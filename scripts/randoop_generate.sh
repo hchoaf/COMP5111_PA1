@@ -47,10 +47,15 @@ fi
 if [ ! -d "$ROOT_DIR"/target/classes ]; then
     mkdir -p "$ROOT_DIR"/target/classes
 fi
-# compile class under test
-echo "compiling castle.comp5111.example.Subject ..."
 
-javac -d "$ROOT_DIR"/target/classes -g "$ROOT_DIR"/src/main/java/comp5111/assignment/cut/Subject.java
+if [ ! -d "$ROOT_DIR"/raw-classes ]; then
+    mkdir -p "$ROOT_DIR"/raw-classes
+fi
+
+# compile class under test
+echo "compiling castle.comp5111.assignment.cut.Subject ..."
+
+javac -d "$ROOT_DIR"/raw-classes -g "$ROOT_DIR"/src/main/java/comp5111/assignment/cut/Subject.java
 
 # test generation using randoop
 # We set the output directory to maven test source folder
@@ -58,11 +63,11 @@ for i in 0 1 2 3 4
 do
   echo "Generating test suite $i"
 
-  java -ea -classpath "$ROOT_DIR"/lib/randoop-all-4.3.1.jar:"$ROOT_DIR"/target/classes \
+  java -ea -classpath "$ROOT_DIR"/lib/randoop-all-4.3.1.jar:"$ROOT_DIR"/raw-classes \
     randoop.main.Main gentests \
     --testclass=comp5111.assignment.cut.Subject \
     --randomseed=$i \
-    --time-limit=30 \
+    --time-limit=5 \
     --junit-package-name=comp5111.assignment.cut \
     --junit-output-dir="$ROOT_DIR"/src/test/randoop$i \
     --regression-test-basename=RegressionTest$i
