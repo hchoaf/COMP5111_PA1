@@ -1,6 +1,8 @@
 package comp5111.assignment;
 
 import java.util.Arrays;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.junit.runner.JUnitCore;
 import soot.Pack;
@@ -14,10 +16,42 @@ public class EntryPoint {
 	public static void main(String[] args) {
 		instrumentWithSoot();
 		
-		runJunitTests();
+		runJunitTests("comp5111.assignment.cut.Regression__Test0");
 		
-		System.out.println("Invocation to static methods: " + Counter.getNumStaticInvocations());
-        System.out.println("Invocation to instance methods: " + Counter.getNumInstanceInvocations());
+		Set<String> innerClasses = Counter.allStatements.values().stream().map(e -> e.declaringClassName).collect(Collectors.toSet());
+		int totalCount = 0;
+		int coveredCount = 0;
+		
+		for (String declaringClassName : innerClasses) {
+			System.out.println("====================================================");
+			System.out.println(declaringClassName);
+			totalCount = (int) Counter.allStatements.values().stream().filter(e -> (e.declaringClassName == declaringClassName)).count();
+			coveredCount = (int) Counter.executedStatements.values().stream().filter(e -> (e.declaringClassName == declaringClassName)).count();
+			System.out.printf("Statement Coverage: %.4f", (float) coveredCount/totalCount);
+			System.out.println();
+			
+		}
+		System.out.println("====================================================");
+		System.out.println("Overall");
+		totalCount = Counter.allStatements.size();
+		coveredCount = Counter.executedStatements.size();
+		System.out.printf("Statement Coverage: %.4f", (float) coveredCount/totalCount);
+		
+		int totalBranches = Counter.allBranches.size();
+		int coveredBranches = 0;
+		for (int lineNum : Counter.allBranches.keySet()) {
+			if (Counter.executedStatements.containsKey(lineNum))
+				coveredBranches ++;
+		}
+		System.out.println(totalBranches);
+		System.out.println(coveredBranches);
+		System.out.printf("Branch Coverage: %.4f", (float) coveredBranches/totalBranches);
+		
+		System.out.println("Count " + Instrumenter.count);
+		
+
+		//System.out.println("Invocation to static methods: " + Counter.getNumStaticInvocations());
+        //System.out.println("Invocation to instance methods: " + Counter.getNumInstanceInvocations());
     }
 	
 	private static void instrumentWithSoot() {
@@ -32,8 +66,8 @@ public class EntryPoint {
         }
         /*Set the soot-classpath to include the helper class and class to analyze*/
         Options.v().set_process_dir(Arrays.asList(classUnderTestPath));
+        // Options.v().set_soot_classpath(Scene.v().defaultClassPath() + classPathSeparator + targetPath + classPathSeparator + classUnderTestPath);
         Options.v().set_soot_classpath(Scene.v().defaultClassPath() + classPathSeparator + targetPath + classPathSeparator + classUnderTestPath);
-
         // we set the soot output dir to target/classes so that the instrumented class can override the class file
         Options.v().set_output_dir(targetPath);
 
@@ -49,16 +83,15 @@ public class EntryPoint {
         jtp.add(new Transform("jtp.instrumenter", instrumenter));
 
 		
-		String classUnderTest = "comp5111.assignment.cut.Subject";
         // pass arguments to soot
-		soot.Main.main(new String[] {classUnderTest});
+		soot.Main.main(new String[] {classUnderTestName});
 		
 	}
 	
-	private static void runJunitTests() {
+	private static void runJunitTests(String testClassName) {
 		Class<?> testClass = null;
 		try {
-			testClass = Class.forName("comp5111.assignment.cut.RegressionTest00");
+			testClass = Class.forName(testClassName);
 			JUnitCore junit = new JUnitCore();
 			System.out.println("Running junit test: " + testClass.getName());
 			junit.run(testClass);
