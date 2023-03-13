@@ -17,12 +17,14 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class Instrumenter extends BodyTransformer{
 	
-	static int count = 0;
 	
 	static SootClass counterClass;
 	static SootMethod addStaticInvocationMethod, addInstanceInvocationMethod, visitNodeMethod, addToExecutedStatementsMethod;
 	
 	static ConcurrentHashMap<Unit, Integer> allStmts = new ConcurrentHashMap<>();
+	
+	static int outsideCount = 0;
+	static int insideCount = 0;
 	
 	
 	static {
@@ -36,9 +38,14 @@ public class Instrumenter extends BodyTransformer{
 	@Override
 	protected void internalTransform(Body body, String phase, Map options) {
 		SootMethod method = body.getMethod();
-		System.out.println("Instrumenting method: " + method.getSignature());
+		// if (!method.getDeclaringClass().toString().equals("comp5111.assignment.cut.Subject$CharTasks")) return;
+		// System.out.println("#############################################################");
+		// System.out.println("Instrumenting method: " + method.getSignature());
+		// System.out.println("Instrumenting body: " + body.toString());
+		
 		
 		Chain<Unit> units = body.getUnits();
+		// System.out.println(units.size());
 		Iterator<?> stmtIt = units.snapshotIterator();
 	
 		stmtIt = units.snapshotIterator();
@@ -47,45 +54,54 @@ public class Instrumenter extends BodyTransformer{
 		List<Unit> branchUnits = new ArrayList<Unit>();
 		
 		for (Unit u : units) {
-			if (u instanceof IfStmt) {
-				branchUnits.add(u);
-			}
+			Stmt stmt = (Stmt) u;
+			if (stmt instanceof JIdentityStmt) continue;
+			outsideCount++;
+			
+			System.out.println(u.hashCode() + "  -  " + u.getJavaSourceStartLineNumber());
 		}
 		
 		while (stmtIt.hasNext()) {
 			Stmt stmt = (Stmt) stmtIt.next();
 			if (stmt instanceof JIdentityStmt) continue;
+			insideCount++;
 			// if (stmt.containsInvokeExpr()) continue;
-			
-			
-			
 			// System.out.println(stmt);
 			// if (!stmt.hasTag("LineNumberTag")) continue;
-			
 			int stmtLineNumber = ((LineNumberTag) stmt.getTag("LineNumberTag")).getLineNumber();
 			String stmtString = "|" + stmt + "|";
 			String stmtDeclaringClassName = body.getMethod().getDeclaringClass().getName();
 			
-
+			// System.out.println(stmt.hashCode());
+			if (stmt instanceof IfStmt) {
+			}
 			StatementInfo stmtInfo = new StatementInfo(stmtLineNumber, stmtString, stmtDeclaringClassName);
 			String debugMessage = stmtLineNumber + ":::" + stmt;
 			// System.out.println(debugMessage);
 			
 			if (stmt instanceof JIdentityStmt) {
 			}
-			if (!Counter.allStatements.containsKey(stmtLineNumber)) {
-				Counter.allStatements.put(stmtLineNumber, stmtInfo);
+			
+			
+			if (!Counter.allStatements.containsKey(stmt.hashCode())) {
+				Counter.allStatements.put(stmt.hashCode(), stmtInfo);
 			}
+			
+			
+			
+			
+			
 			
 			InvokeExpr expr = null;
 			
-			expr = Jimple.v().newStaticInvokeExpr(addToExecutedStatementsMethod.makeRef(), IntConstant.v(stmtLineNumber));
+			expr = Jimple.v().newStaticInvokeExpr(addToExecutedStatementsMethod.makeRef(), IntConstant.v(stmt.hashCode()));
 			Stmt incStmt = Jimple.v().newInvokeStmt(expr);
 			units.insertBefore(incStmt, stmt);
 			
 			
 			
 		}
+		
 	}
 
 }

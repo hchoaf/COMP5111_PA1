@@ -1,6 +1,8 @@
 package comp5111.assignment;
 
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.Set;
+import java.util.HashSet;
 
 
 public class Counter {
@@ -10,6 +12,8 @@ public class Counter {
 	static ConcurrentHashMap<Integer, StatementInfo> allBranches = new ConcurrentHashMap<>();
 	
 	static ConcurrentHashMap<Integer, StatementInfo> executedStatements = new ConcurrentHashMap<>();
+	
+	static Set<Integer> branchStatements = new HashSet<>();
 	
 	
 	public static void addToExecutedStatements(int sourceLineNumber) {

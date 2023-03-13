@@ -16,7 +16,7 @@ public class EntryPoint {
 	public static void main(String[] args) {
 		instrumentWithSoot();
 		
-		runJunitTests("comp5111.assignment.cut.Regression__Test0");
+		runJunitTests("comp5111.assignment.cut.Regression__Test");
 		
 		Set<String> innerClasses = Counter.allStatements.values().stream().map(e -> e.declaringClassName).collect(Collectors.toSet());
 		int totalCount = 0;
@@ -27,6 +27,7 @@ public class EntryPoint {
 			System.out.println(declaringClassName);
 			totalCount = (int) Counter.allStatements.values().stream().filter(e -> (e.declaringClassName == declaringClassName)).count();
 			coveredCount = (int) Counter.executedStatements.values().stream().filter(e -> (e.declaringClassName == declaringClassName)).count();
+			System.out.println("Covered / Total : " + coveredCount + " / " + totalCount);
 			System.out.printf("Statement Coverage: %.4f", (float) coveredCount/totalCount);
 			System.out.println();
 			
@@ -35,19 +36,18 @@ public class EntryPoint {
 		System.out.println("Overall");
 		totalCount = Counter.allStatements.size();
 		coveredCount = Counter.executedStatements.size();
-		System.out.printf("Statement Coverage: %.4f", (float) coveredCount/totalCount);
-		
-		int totalBranches = Counter.allBranches.size();
-		int coveredBranches = 0;
-		for (int lineNum : Counter.allBranches.keySet()) {
-			if (Counter.executedStatements.containsKey(lineNum))
-				coveredBranches ++;
+		System.out.println("Covered / Total : " + coveredCount + " / " + totalCount);
+		System.out.printf("Statement Coverage: %.4f \n", (float) coveredCount/totalCount);
+		int totalBranchCount = Counter.branchStatements.size();
+		int coveredBranchCount = 0;
+		for (int sourceNumber : Counter.branchStatements) {
+			if (Counter.executedStatements.containsKey(sourceNumber)) {
+				coveredBranchCount++;
+			}
 		}
-		System.out.println(totalBranches);
-		System.out.println(coveredBranches);
-		System.out.printf("Branch Coverage: %.4f", (float) coveredBranches/totalBranches);
-		
-		System.out.println("Count " + Instrumenter.count);
+		System.out.println("##########");
+		System.out.println(Instrumenter.outsideCount);
+		System.out.println(Instrumenter.insideCount);
 		
 
 		//System.out.println("Invocation to static methods: " + Counter.getNumStaticInvocations());
