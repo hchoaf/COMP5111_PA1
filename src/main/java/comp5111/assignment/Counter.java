@@ -1,26 +1,32 @@
 package comp5111.assignment;
 
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.Set;
-import java.util.HashSet;
+
+
 
 
 public class Counter {
 	
 	static ConcurrentHashMap<Integer, StatementInfo> allStatements = new ConcurrentHashMap<>();
 	
-	static ConcurrentHashMap<Integer, StatementInfo> allBranches = new ConcurrentHashMap<>();
-	
 	static ConcurrentHashMap<Integer, StatementInfo> executedStatements = new ConcurrentHashMap<>();
+
+	static ConcurrentHashMap<StatementInfo, StatementInfo> registeredBranches = new ConcurrentHashMap<>();
 	
-	static Set<Integer> branchStatements = new HashSet<>();
+	static ConcurrentHashMap<StatementInfo, StatementInfo> executedBranches = new ConcurrentHashMap<>();
+	
+	static Integer previousStmtHashCode = null;
 	
 	
-	public static void addToExecutedStatements(int sourceLineNumber) {
-		if (allStatements.containsKey(sourceLineNumber)) {
-			executedStatements.put(sourceLineNumber, allStatements.get(sourceLineNumber));
+	public static void addToExecutedStatements(int hashCode) {
+		if (allStatements.containsKey(hashCode)) {
+			executedStatements.put(hashCode, allStatements.get(hashCode));
+			if (previousStmtHashCode != null) {
+				executedBranches.put(allStatements.get(previousStmtHashCode), allStatements.get(hashCode));
+			}
+			previousStmtHashCode = hashCode;
 		} else {
-			throw new IllegalArgumentException("Statement in line " + sourceLineNumber + " does not exist.");
+			throw new IllegalArgumentException("Statement in line " + hashCode + " does not exist.");
 		}
 	}
 	
@@ -30,52 +36,15 @@ public class Counter {
 	}
 	
 	public static int getRegisteredStatementsCount(String declaredClassName) {
+		return (int) allStatements.values().stream().filter(e -> (e.declaringClassName == declaredClassName)).count();
+	}
+	
+	public static int getExecutedStatementsCount() {
+		return executedStatements.size();
+	}
+	
+	public static int getExecutedStatementsCount(String declaredClassName) {
+		return (int) executedStatements.values().stream().filter(e -> (e.declaringClassName == declaredClassName)).count();
+	}
 		
-		return 0;
-	}
-	
-	
-	
-	static ConcurrentHashMap<Integer, Integer> nodeCover = new ConcurrentHashMap<>();
-	// static HashMap<Integer, Integer> edgeCover = new HashMap<>();
-	
-	public static void visitNode(int stmtId) {
-		nodeCover.put(stmtId, nodeCover.getOrDefault(stmtId, 0) + 1);
-	}
-	
-	public static int getNodeCover(int stmtId) {
-		return nodeCover.getOrDefault(stmtId, 0);
-	}
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-    private static int numStaticInvocations = 0;
-    private static int numInstanceInvocations = 0;
-
-    public static void addStaticInvocation(int n) {
-        numStaticInvocations += n;
-    }
-
-    public static void addInstanceInvocation(int n) {
-        numInstanceInvocations += n;
-    }
-
-    public static int getNumInstanceInvocations() {
-        return numInstanceInvocations;
-    }
-
-    public static int getNumStaticInvocations() {
-        return numStaticInvocations;
-    }
 }

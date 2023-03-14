@@ -18,41 +18,51 @@ public class EntryPoint {
 		
 		runJunitTests("comp5111.assignment.cut.Regression__Test");
 		
-		Set<String> innerClasses = Counter.allStatements.values().stream().map(e -> e.declaringClassName).collect(Collectors.toSet());
+		Set<String> innerClasses = Counter.allStatements.values().stream().map(stmt -> stmt.declaringClassName).collect(Collectors.toSet());
 		int totalCount = 0;
 		int coveredCount = 0;
 		
+		System.out.println("=================================================");
+		System.out.println("Statement Coverage");
+		
+		printResult("Overall", Counter.getExecutedStatementsCount(), Counter.getRegisteredStatementsCount());
+		
 		for (String declaringClassName : innerClasses) {
-			System.out.println("====================================================");
-			System.out.println(declaringClassName);
-			totalCount = (int) Counter.allStatements.values().stream().filter(e -> (e.declaringClassName == declaringClassName)).count();
-			coveredCount = (int) Counter.executedStatements.values().stream().filter(e -> (e.declaringClassName == declaringClassName)).count();
-			System.out.println("Covered / Total : " + coveredCount + " / " + totalCount);
-			System.out.printf("Statement Coverage: %.4f", (float) coveredCount/totalCount);
-			System.out.println();
+			totalCount = Counter.getRegisteredStatementsCount(declaringClassName);
+			coveredCount = Counter.getExecutedStatementsCount(declaringClassName);
+			printResult(declaringClassName, coveredCount, totalCount);
 			
 		}
-		System.out.println("====================================================");
-		System.out.println("Overall");
-		totalCount = Counter.allStatements.size();
-		coveredCount = Counter.executedStatements.size();
-		System.out.println("Covered / Total : " + coveredCount + " / " + totalCount);
-		System.out.printf("Statement Coverage: %.4f \n", (float) coveredCount/totalCount);
-		int totalBranchCount = Counter.branchStatements.size();
-		int coveredBranchCount = 0;
-		for (int sourceNumber : Counter.branchStatements) {
-			if (Counter.executedStatements.containsKey(sourceNumber)) {
-				coveredBranchCount++;
-			}
-		}
-		System.out.println("##########");
-		System.out.println(Instrumenter.outsideCount);
-		System.out.println(Instrumenter.insideCount);
+		System.out.println("=================================================");
+		System.out.println("Branch Coverage");
 		
 
 		//System.out.println("Invocation to static methods: " + Counter.getNumStaticInvocations());
         //System.out.println("Invocation to instance methods: " + Counter.getNumInstanceInvocations());
+		
+		
+		Counter.registeredBranches.entrySet().forEach(entry -> {
+		    System.out.println("Source: "+ entry.getKey());
+		    System.out.println("Destination: " + entry.getValue());
+		    System.out.println();
+		});
+		
+		
+		
+		
+		
+		
+		
+		
     }
+	
+	private static void printResult(String declaringClassName, int coveredCount, int totalCount) {
+		System.out.println();
+		System.out.println(declaringClassName);
+		System.out.println("Covered / Total : " + coveredCount + " / " + totalCount);
+		System.out.printf("Percentage: %.4f%%", (float) coveredCount*100/totalCount);
+		System.out.println();
+	}
 	
 	private static void instrumentWithSoot() {
         // the path to the compiled Subject class file
