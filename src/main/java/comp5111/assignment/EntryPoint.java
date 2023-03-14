@@ -1,5 +1,6 @@
 package comp5111.assignment;
 
+import java.util.AbstractMap;
 import java.util.Arrays;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -39,14 +40,20 @@ public class EntryPoint {
 
 		//System.out.println("Invocation to static methods: " + Counter.getNumStaticInvocations());
         //System.out.println("Invocation to instance methods: " + Counter.getNumInstanceInvocations());
+		totalCount = 0;
+		coveredCount = 0;
 		
+		System.out.println("=================================================");
+		System.out.println("Branch Coverage");
 		
-		Counter.registeredBranches.entrySet().forEach(entry -> {
-		    System.out.println("Source: "+ entry.getKey());
-		    System.out.println("Destination: " + entry.getValue());
-		    System.out.println();
-		});
+		printResult("Overall", Counter.getExecutedBranchesCount(), Counter.getRegisteredBranchesCount());
 		
+		for (String declaringClassName : innerClasses) {
+			totalCount = Counter.getRegisteredBranchesCount(declaringClassName);
+			coveredCount = Counter.getExecutedBranchesCount(declaringClassName);
+			printResult(declaringClassName, coveredCount, totalCount);
+			
+		}
 		
 		
 		

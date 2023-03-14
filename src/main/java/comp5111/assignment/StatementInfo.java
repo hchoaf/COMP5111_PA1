@@ -1,7 +1,5 @@
 package comp5111.assignment;
 
-import soot.jimple.Stmt;
-import soot.tagkit.LineNumberTag;
 
 public class StatementInfo {
 	public final int hashCode;
@@ -13,13 +11,6 @@ public class StatementInfo {
 		this.hashCode = hashCode;
 		this.lineNumber = lineNumber;
 		this.statementString = statementString;
-		this.declaringClassName = declaringClassName;
-	}
-	
-	public StatementInfo(Stmt stmt, String declaringClassName) {
-		this.hashCode = stmt.hashCode();
-		this.lineNumber = ((LineNumberTag) stmt.getTag("LineNumberTag")).getLineNumber();
-		this.statementString = "|" + stmt + "|";
 		this.declaringClassName = declaringClassName;
 	}
 	

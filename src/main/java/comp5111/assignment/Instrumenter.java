@@ -20,13 +20,14 @@ import java.util.Set;
 public class Instrumenter extends BodyTransformer{
 	
 	
-	static SootClass counterClass;
+	static SootClass counterClass, statementInfoClass;
 	static SootMethod addStaticInvocationMethod, addInstanceInvocationMethod, visitNodeMethod, addToExecutedStatementsMethod;
 	
 	
 	
 	static {
 		counterClass = Scene.v().loadClassAndSupport("comp5111.assignment.Counter");
+		statementInfoClass = Scene.v().loadClassAndSupport("comp5111.assignment.StatementInfo");
 		addToExecutedStatementsMethod = counterClass.getMethod("void addToExecutedStatements(int)");
 	}
 	
@@ -50,7 +51,11 @@ public class Instrumenter extends BodyTransformer{
 		for (Unit u : units) {
 			Stmt stmt = (Stmt) u;
 			if (stmt instanceof JIdentityStmt) continue;
-			StatementInfo stmtInfo = new StatementInfo(stmt, className);
+			int stmtHashCode = stmt.hashCode();
+			int stmtLineNumber = stmt.getJavaSourceStartLineNumber();
+			String stmtString = stmt.toString();
+			
+			StatementInfo stmtInfo = new StatementInfo(stmtHashCode, stmtLineNumber, stmtString, className);
 			if (!Counter.allStatements.containsKey(stmt.hashCode())) {
 				Counter.allStatements.put(stmtInfo.hashCode, stmtInfo);
 			}
@@ -68,9 +73,19 @@ public class Instrumenter extends BodyTransformer{
         	if (unit instanceof IfStmt || unit instanceof TableSwitchStmt || unit instanceof LookupSwitchStmt) {
         		Set<Integer> targets = new HashSet<>();
         		for (Unit successor : cfg.getSuccsOf(unit)) {
-        			StatementInfo srcStmtInfo = new StatementInfo((Stmt) unit, className);
-        			StatementInfo dstStmtInfo = new StatementInfo((Stmt) successor, className);
-        			Counter.registeredBranches.put(srcStmtInfo, dstStmtInfo);
+        			Stmt srcStmt = (Stmt) unit;
+        			int srcHashCode = srcStmt.hashCode();
+        			int srcLineNumber = srcStmt.getJavaSourceStartLineNumber();
+        			String srcString = srcStmt.toString();
+        			StatementInfo srcInfo = new StatementInfo(srcHashCode, srcLineNumber, srcString, className);
+        			
+        			Stmt dstStmt = (Stmt) successor;
+        			int dstHashCode = dstStmt.hashCode();
+        			int dstLineNumber = dstStmt.getJavaSourceStartLineNumber();
+        			String dstString = dstStmt.toString();
+        			StatementInfo dstInfo = new StatementInfo(dstHashCode, dstLineNumber, dstString, className);
+        			BranchInfo brcInfo = new BranchInfo(srcInfo, dstInfo);
+        			Counter.registeredBranches.put(brcInfo, 1);
         			targets.add(successor.hashCode());
         		}
         	}
