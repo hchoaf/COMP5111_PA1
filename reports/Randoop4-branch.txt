@@ -1,0 +1,38 @@
+Randoop4 Branch Coverage
+=================================================
+
+Overall
+Covered / Total : 0 / 570
+Percentage: 0.00%
+
+comp5111.assignment.cut.Subject$NumberTasks
+Covered / Total : 0 / 176
+Percentage: 0.00%
+
+comp5111.assignment.cut.Subject$CharTasks
+Covered / Total : 0 / 24
+Percentage: 0.00%
+
+comp5111.assignment.cut.Subject$GregorianTasks
+Covered / Total : 0 / 94
+Percentage: 0.00%
+
+comp5111.assignment.cut.Subject$ArrayTasks
+Covered / Total : 0 / 22
+Percentage: 0.00%
+
+comp5111.assignment.cut.Subject$FilenameTasks
+Covered / Total : 0 / 98
+Percentage: 0.00%
+
+comp5111.assignment.cut.Subject
+Covered / Total : 0 / 0
+Percentage: 0.00%
+
+comp5111.assignment.cut.Subject$StringTasks
+Covered / Total : 0 / 152
+Percentage: 0.00%
+
+comp5111.assignment.cut.Subject$BooleanTasks
+Covered / Total : 0 / 4
+Percentage: 0.00%

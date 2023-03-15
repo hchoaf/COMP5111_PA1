@@ -33,7 +33,6 @@ public class Instrumenter extends BodyTransformer{
 	
 	@Override
 	protected void internalTransform(Body body, String phase, Map options) {
-		System.out.println(counterClass);
 		SootMethod method = body.getMethod();
 		// if (!method.getDeclaringClass().toString().equals("comp5111.assignment.cut.Subject$CharTasks")) return;
 		// System.out.println("#############################################################");

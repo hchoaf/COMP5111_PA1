@@ -24,4 +24,12 @@ find "$ROOT_DIR"/src/main/java -name "*.java" -print0 | xargs -0 \
   javac -classpath .:"$ROOT_DIR"/lib/* -d "$ROOT_DIR"/target/classes
 
 # 3. we run the main method of castle.comp5111.example.EntryPoint
-java -classpath .:"$ROOT_DIR"/lib/*:"$ROOT_DIR"/target/classes comp5111.assignment.EntryPoint
+for i in 0 1 2 3 4
+do
+  echo "###########################################################################"
+  echo "Instrument, run test, and generate report for randoop test suite $i \n"
+  java -classpath .:"$ROOT_DIR"/lib/*:"$ROOT_DIR"/target/classes comp5111.assignment.EntryPoint $i
+done
+# Below is to cross-check with provided example
+
+# java -classpath .:"$ROOT_DIR"/lib/*:"$ROOT_DIR"/target/classes comp5111.assignment.EntryPoint 

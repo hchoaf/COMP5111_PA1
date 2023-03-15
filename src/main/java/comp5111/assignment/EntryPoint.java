@@ -1,6 +1,8 @@
 package comp5111.assignment;
 
-import java.util.AbstractMap;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -15,61 +17,88 @@ import soot.options.Options;
 public class EntryPoint {
 
 	public static void main(String[] args) {
-		instrumentWithSoot();
+		String packageName = "comp5111.assignment.cut";
+		String testClassName = "";
+		String reportName = "";
+		if (args[0].equals("example")) {
+			testClassName = "Regression__Test";
+			reportName = "example";
+		} else {
+			testClassName = "RegressionTest" + args[0];
+			reportName = "Randoop" + args[0];
+		}
 		
-		runJunitTests("comp5111.assignment.cut.Regression__Test");
+		instrumentWithSoot();
+		runJunitTests(packageName + "." + testClassName);
 		
 		Set<String> innerClasses = Counter.allStatements.values().stream().map(stmt -> stmt.declaringClassName).collect(Collectors.toSet());
 		int totalCount = 0;
 		int coveredCount = 0;
 		
-		System.out.println("=================================================");
-		System.out.println("Statement Coverage");
-		
-		printResult("Overall", Counter.getExecutedStatementsCount(), Counter.getRegisteredStatementsCount());
-		
+		StringBuffer statementResultText = new StringBuffer(reportName+" Statement Coverage\n");
+		statementResultText.append("=================================================\n");
+		statementResultText.append(resultString("Overall", Counter.getExecutedStatementsCount(), Counter.getRegisteredStatementsCount()));
 		for (String declaringClassName : innerClasses) {
 			totalCount = Counter.getRegisteredStatementsCount(declaringClassName);
 			coveredCount = Counter.getExecutedStatementsCount(declaringClassName);
-			printResult(declaringClassName, coveredCount, totalCount);
-			
+			statementResultText.append(resultString(declaringClassName, coveredCount, totalCount));
 		}
-		System.out.println("=================================================");
-		System.out.println("Branch Coverage");
-		
-
-		//System.out.println("Invocation to static methods: " + Counter.getNumStaticInvocations());
-        //System.out.println("Invocation to instance methods: " + Counter.getNumInstanceInvocations());
+	
 		totalCount = 0;
 		coveredCount = 0;
 		
-		System.out.println("=================================================");
-		System.out.println("Branch Coverage");
-		
-		printResult("Overall", Counter.getExecutedBranchesCount(), Counter.getRegisteredBranchesCount());
-		
+		StringBuffer branchResultText = new StringBuffer(reportName+" Branch Coverage\n");
+		branchResultText.append("=================================================\n");
+		branchResultText.append(resultString("Overall", Counter.getExecutedBranchesCount(), Counter.getRegisteredBranchesCount()));
 		for (String declaringClassName : innerClasses) {
 			totalCount = Counter.getRegisteredBranchesCount(declaringClassName);
 			coveredCount = Counter.getExecutedBranchesCount(declaringClassName);
-			printResult(declaringClassName, coveredCount, totalCount);
-			
+			branchResultText.append(resultString(declaringClassName, coveredCount, totalCount));
 		}
+
+    	String reportsPath = "./reports/";
+		generateReport(reportsPath + reportName + "-stmt.txt", statementResultText.toString());
+		generateReport(reportsPath + reportName + "-branch.txt", branchResultText.toString());
 		
-		
-		
-		
+		if (args[0].equals("example")) {
+			System.out.println(statementResultText.toString());
+			System.out.println(branchResultText.toString());
+		}
 		
 		
 		
     }
 	
-	private static void printResult(String declaringClassName, int coveredCount, int totalCount) {
-		System.out.println();
-		System.out.println(declaringClassName);
-		System.out.println("Covered / Total : " + coveredCount + " / " + totalCount);
-		System.out.printf("Percentage: %.4f%%", (float) coveredCount*100/totalCount);
-		System.out.println();
+	private static String resultString(String declaringClassName, int coveredCount, int totalCount) {
+		StringBuffer sb = new StringBuffer("\n"+declaringClassName);
+		sb.append("\nCovered / Total : " + coveredCount + " / " + totalCount);
+		float percentage = (totalCount == 0) ? 0 : (float) coveredCount*100 / totalCount;
+		sb.append(String.format("\nPercentage: %.2f%%\n", percentage));
+		return sb.toString();
 	}
+	
+	private static void generateReport(String fileName, String context) {
+		try {
+			File myObj = new File(fileName);
+			if (myObj.createNewFile()) {
+	    		System.out.println("File created: " + myObj.getName());
+	    	} else {
+	    		System.out.println("File already exists. Overwriting to file :" + myObj.getName());
+	    	}
+			FileWriter myWriter = new FileWriter(fileName, false);
+			myWriter.write(context);
+			myWriter.close();
+			System.out.println("Successfully wrote to the file: " + myObj.getName());
+			
+		} catch (IOException e) {
+    		System.out.println("An error occurred.");
+    		e.printStackTrace();
+	    }
+	}
+	
+	
+	
+	
 	
 	private static void instrumentWithSoot() {
         // the path to the compiled Subject class file

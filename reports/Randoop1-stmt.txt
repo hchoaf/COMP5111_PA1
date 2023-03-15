@@ -1,0 +1,38 @@
+Randoop1 Statement Coverage
+=================================================
+
+Overall
+Covered / Total : 56 / 2204
+Percentage: 2.54%
+
+comp5111.assignment.cut.Subject$NumberTasks
+Covered / Total : 16 / 702
+Percentage: 2.28%
+
+comp5111.assignment.cut.Subject$CharTasks
+Covered / Total : 9 / 92
+Percentage: 9.78%
+
+comp5111.assignment.cut.Subject$GregorianTasks
+Covered / Total : 7 / 292
+Percentage: 2.40%
+
+comp5111.assignment.cut.Subject$FilenameTasks
+Covered / Total : 1 / 408
+Percentage: 0.25%
+
+comp5111.assignment.cut.Subject$ArrayTasks
+Covered / Total : 1 / 98
+Percentage: 1.02%
+
+comp5111.assignment.cut.Subject
+Covered / Total : 1 / 4
+Percentage: 25.00%
+
+comp5111.assignment.cut.Subject$StringTasks
+Covered / Total : 19 / 590
+Percentage: 3.22%
+
+comp5111.assignment.cut.Subject$BooleanTasks
+Covered / Total : 2 / 18
+Percentage: 11.11%
