@@ -2,37 +2,37 @@ Randoop3 Statement Coverage
 =================================================
 
 Overall
-Covered / Total : 59 / 8816
-Percentage: 0.67%
+Covered / Total : 636 / 1102
+Percentage: 57.71%
 
 comp5111.assignment.cut.Subject$NumberTasks
-Covered / Total : 19 / 2808
-Percentage: 0.68%
+Covered / Total : 135 / 351
+Percentage: 38.46%
 
 comp5111.assignment.cut.Subject$CharTasks
-Covered / Total : 9 / 368
-Percentage: 2.45%
+Covered / Total : 42 / 46
+Percentage: 91.30%
 
 comp5111.assignment.cut.Subject$GregorianTasks
-Covered / Total : 6 / 1168
-Percentage: 0.51%
-
-comp5111.assignment.cut.Subject$ArrayTasks
-Covered / Total : 1 / 392
-Percentage: 0.26%
+Covered / Total : 86 / 146
+Percentage: 58.90%
 
 comp5111.assignment.cut.Subject$FilenameTasks
-Covered / Total : 1 / 1632
-Percentage: 0.06%
+Covered / Total : 106 / 204
+Percentage: 51.96%
+
+comp5111.assignment.cut.Subject$ArrayTasks
+Covered / Total : 47 / 49
+Percentage: 95.92%
 
 comp5111.assignment.cut.Subject
-Covered / Total : 1 / 16
-Percentage: 6.25%
+Covered / Total : 2 / 2
+Percentage: 100.00%
 
 comp5111.assignment.cut.Subject$StringTasks
-Covered / Total : 20 / 2360
-Percentage: 0.85%
+Covered / Total : 209 / 295
+Percentage: 70.85%
 
 comp5111.assignment.cut.Subject$BooleanTasks
-Covered / Total : 2 / 72
-Percentage: 2.78%
+Covered / Total : 9 / 9
+Percentage: 100.00%

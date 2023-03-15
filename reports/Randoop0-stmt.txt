@@ -17,13 +17,13 @@ comp5111.assignment.cut.Subject$GregorianTasks
 Covered / Total : 99 / 146
 Percentage: 67.81%
 
-comp5111.assignment.cut.Subject$ArrayTasks
-Covered / Total : 43 / 49
-Percentage: 87.76%
-
 comp5111.assignment.cut.Subject$FilenameTasks
 Covered / Total : 105 / 204
 Percentage: 51.47%
+
+comp5111.assignment.cut.Subject$ArrayTasks
+Covered / Total : 43 / 49
+Percentage: 87.76%
 
 comp5111.assignment.cut.Subject
 Covered / Total : 2 / 2

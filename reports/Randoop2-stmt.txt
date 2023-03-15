@@ -2,37 +2,37 @@ Randoop2 Statement Coverage
 =================================================
 
 Overall
-Covered / Total : 53 / 4408
-Percentage: 1.20%
+Covered / Total : 620 / 1102
+Percentage: 56.26%
 
 comp5111.assignment.cut.Subject$NumberTasks
-Covered / Total : 16 / 1404
-Percentage: 1.14%
+Covered / Total : 135 / 351
+Percentage: 38.46%
 
 comp5111.assignment.cut.Subject$CharTasks
-Covered / Total : 9 / 184
-Percentage: 4.89%
+Covered / Total : 42 / 46
+Percentage: 91.30%
 
 comp5111.assignment.cut.Subject$GregorianTasks
-Covered / Total : 5 / 584
-Percentage: 0.86%
+Covered / Total : 71 / 146
+Percentage: 48.63%
 
 comp5111.assignment.cut.Subject$FilenameTasks
-Covered / Total : 1 / 816
-Percentage: 0.12%
+Covered / Total : 105 / 204
+Percentage: 51.47%
 
 comp5111.assignment.cut.Subject$ArrayTasks
-Covered / Total : 1 / 196
-Percentage: 0.51%
+Covered / Total : 47 / 49
+Percentage: 95.92%
 
 comp5111.assignment.cut.Subject
-Covered / Total : 1 / 8
-Percentage: 12.50%
+Covered / Total : 2 / 2
+Percentage: 100.00%
 
 comp5111.assignment.cut.Subject$StringTasks
-Covered / Total : 18 / 1180
-Percentage: 1.53%
+Covered / Total : 209 / 295
+Percentage: 70.85%
 
 comp5111.assignment.cut.Subject$BooleanTasks
-Covered / Total : 2 / 36
-Percentage: 5.56%
+Covered / Total : 9 / 9
+Percentage: 100.00%

@@ -17,6 +17,7 @@ import soot.options.Options;
 public class EntryPoint {
 
 	public static void main(String[] args) {
+		System.out.println("Current All Statements Size: " + Counter.allStatements.size());
 		String packageName = "comp5111.assignment.cut";
 		String testClassName = "";
 		String reportName = "";
@@ -30,6 +31,7 @@ public class EntryPoint {
 		
 		instrumentWithSoot();
 		runJunitTests(packageName + "." + testClassName);
+		System.out.println("All Statements Size: " + Counter.allStatements.size());
 		
 		Set<String> innerClasses = Counter.allStatements.values().stream().map(stmt -> stmt.declaringClassName).collect(Collectors.toSet());
 		int totalCount = 0;

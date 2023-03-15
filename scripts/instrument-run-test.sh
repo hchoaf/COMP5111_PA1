@@ -23,11 +23,25 @@ fi
 find "$ROOT_DIR"/src/main/java -name "*.java" -print0 | xargs -0 \
   javac -classpath .:"$ROOT_DIR"/lib/* -d "$ROOT_DIR"/target/classes
 
-# 3. we run the main method of castle.comp5111.example.EntryPoint
 for i in 0 1 2 3 4
 do
   echo "###########################################################################"
-  echo "Instrument, run test, and generate report for randoop test suite $i \n"
+  echo "Randoop test suite $i \n"
+  # 1. we compile the class under test castle.comp5111.example.Subject
+  echo "compiling comp5111.assignment.cut.Subject ..."
+  javac -d "$ROOT_DIR"/raw-classes "$ROOT_DIR"/src/main/java/comp5111/assignment/cut/Subject.java
+
+  # 2. we compile the classes to instrument Subject and count invocations using soot
+  echo "compiling instrumentation classes ..."
+  if [ ! -d "$ROOT_DIR"/target/classes ]; then
+      mkdir -p "$ROOT_DIR"/target/classes
+  fi
+
+  find "$ROOT_DIR"/src/main/java -name "*.java" -print0 | xargs -0 \
+    javac -classpath .:"$ROOT_DIR"/lib/* -d "$ROOT_DIR"/target/classes
+
+  echo "Instrument with soot, run test, generate report ..."
+  # 3. we run the main method of castle.comp5111.example.EntryPoint
   java -classpath .:"$ROOT_DIR"/lib/*:"$ROOT_DIR"/target/classes comp5111.assignment.EntryPoint $i
 done
 # Below is to cross-check with provided example
