@@ -33,16 +33,10 @@ public class Instrumenter extends BodyTransformer{
 	
 	@Override
 	protected void internalTransform(Body body, String phase, Map options) {
-		System.out.println("All Statements Size: " + Counter.allStatements.size());
 		SootMethod method = body.getMethod();
-		// if (!method.getDeclaringClass().toString().equals("comp5111.assignment.cut.Subject$CharTasks")) return;
-		// System.out.println("#############################################################");
-		// System.out.println("Instrumenting method: " + method.getSignature());
-		// System.out.println("Instrumenting body: " + body.toString());
 		String className = method.getDeclaringClass().getName();
 		
 		Chain<Unit> units = body.getUnits();
-		// System.out.println(units.size());
 		Iterator<?> stmtIt = units.snapshotIterator();
 	
 		stmtIt = units.snapshotIterator();
@@ -56,12 +50,8 @@ public class Instrumenter extends BodyTransformer{
 			String stmtString = stmt.toString();
 			
 			StatementInfo stmtInfo = new StatementInfo(stmtHashCode, stmtLineNumber, stmtString, className);
-			if (!Counter.allStatements.containsKey(stmt.hashCode())) {
-				Counter.allStatements.put(stmtInfo.hashCode, stmtInfo);
-			}
-			
-			if (stmt instanceof IfStmt) {
-				// units.getSuccOf(stmt).getUni
+			if (!Counter.registeredStatements.containsKey(stmt.hashCode())) {
+				Counter.registeredStatements.put(stmtInfo.hashCode, stmtInfo);
 			}
 		}
 		
@@ -101,13 +91,8 @@ public class Instrumenter extends BodyTransformer{
 			
 			if (stmt instanceof JIdentityStmt) continue;
 			
-			if (stmt instanceof IfStmt) {
-			}
-			
 			
 			int stmtHashCode = stmt.hashCode();
-			
-			
 			
 			InvokeExpr expr = null;
 			

@@ -17,7 +17,6 @@ import soot.options.Options;
 public class EntryPoint {
 
 	public static void main(String[] args) {
-		System.out.println("Current All Statements Size: " + Counter.allStatements.size());
 		String packageName = "comp5111.assignment.cut";
 		String testClassName = "";
 		String reportName = "";
@@ -31,11 +30,12 @@ public class EntryPoint {
 		
 		instrumentWithSoot();
 		runJunitTests(packageName + "." + testClassName);
-		System.out.println("All Statements Size: " + Counter.allStatements.size());
 		
-		Set<String> innerClasses = Counter.allStatements.values().stream().map(stmt -> stmt.declaringClassName).collect(Collectors.toSet());
+		Set<String> innerClasses = Counter.registeredStatements.values().stream().map(stmt -> stmt.declaringClassName).collect(Collectors.toSet());
 		int totalCount = 0;
 		int coveredCount = 0;
+
+		
 		
 		StringBuffer statementResultText = new StringBuffer(reportName+" Statement Coverage\n");
 		statementResultText.append("=================================================\n");
@@ -57,15 +57,13 @@ public class EntryPoint {
 			coveredCount = Counter.getExecutedBranchesCount(declaringClassName);
 			branchResultText.append(resultString(declaringClassName, coveredCount, totalCount));
 		}
+		
 
     	String reportsPath = "./reports/";
-		generateReport(reportsPath + reportName + "-stmt.txt", statementResultText.toString());
-		generateReport(reportsPath + reportName + "-branch.txt", branchResultText.toString());
+    	String reportContent = Counter.returnAllStatements() + "\n" + Counter.returnAllBranches() + "\n" + statementResultText.toString() + "\n" + branchResultText.toString();
+    	generateReport(reportsPath + reportName + ".txt", reportContent);
 		
-		if (args[0].equals("example")) {
-			System.out.println(statementResultText.toString());
-			System.out.println(branchResultText.toString());
-		}
+		
 		
 		
 		
@@ -73,9 +71,14 @@ public class EntryPoint {
 	
 	private static String resultString(String declaringClassName, int coveredCount, int totalCount) {
 		StringBuffer sb = new StringBuffer("\n"+declaringClassName);
-		sb.append("\nCovered / Total : " + coveredCount + " / " + totalCount);
-		float percentage = (totalCount == 0) ? 0 : (float) coveredCount*100 / totalCount;
-		sb.append(String.format("\nPercentage: %.2f%%\n", percentage));
+		// sb.append("\nCovered / Total : " + coveredCount + " / " + totalCount);
+		if (totalCount == 0) {
+			sb.append("\nPercentage: NaN \n");
+		} else {
+			float percentage = (float) coveredCount*100 / totalCount;
+			sb.append(String.format("\nPercentage: %.2f%%\n", percentage));
+			
+		}
 		return sb.toString();
 	}
 	

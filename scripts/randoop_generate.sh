@@ -67,7 +67,7 @@ do
     randoop.main.Main gentests \
     --testclass=comp5111.assignment.cut.Subject \
     --randomseed=$i \
-    --time-limit=5 \
+    --time-limit=60 \
     --junit-package-name=comp5111.assignment.cut \
     --junit-output-dir="$ROOT_DIR"/src/test/randoop$i \
     --regression-test-basename=RegressionTest$i

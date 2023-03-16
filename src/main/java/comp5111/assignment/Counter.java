@@ -10,7 +10,9 @@ import java.util.stream.Collectors;
 
 public class Counter {
 	
-	static ConcurrentHashMap<Integer, StatementInfo> allStatements = new ConcurrentHashMap<>();
+	static final int MAXLENGTH = 100;
+	
+	static ConcurrentHashMap<Integer, StatementInfo> registeredStatements = new ConcurrentHashMap<>();
 	
 	static ConcurrentHashMap<Integer, StatementInfo> executedStatements = new ConcurrentHashMap<>();
 	
@@ -24,8 +26,8 @@ public class Counter {
 	
 	
 	public static void addToExecutedStatements(int hashCode) {
-		if (allStatements.containsKey(hashCode)) {
-			executedStatements.put(hashCode, allStatements.get(hashCode));
+		if (registeredStatements.containsKey(hashCode)) {
+			executedStatements.put(hashCode, registeredStatements.get(hashCode));
 			if (previousStmtHashCode != null) {
 				Map.Entry<Integer, Integer> tmp = new AbstractMap.SimpleEntry<>(previousStmtHashCode, hashCode);
 				executedBranches.put(tmp, executedBranches.getOrDefault(tmp, 0) + 1);
@@ -38,11 +40,11 @@ public class Counter {
 	
 	
 	public static int getRegisteredStatementsCount() {
-		return allStatements.size();
+		return registeredStatements.size();
 	}
 	
 	public static int getRegisteredStatementsCount(String declaredClassName) {
-		return (int) allStatements.values().stream().filter(e -> (e.declaringClassName == declaredClassName)).count();
+		return (int) registeredStatements.values().stream().filter(e -> (e.declaringClassName == declaredClassName)).count();
 	}
 	
 	public static int getExecutedStatementsCount() {
@@ -85,5 +87,51 @@ public class Counter {
 		return count;
 		
 	}
+	
+	public static String returnAllStatements() {
+		StringBuffer sb = new StringBuffer("[Coverage of Each Statement]\n");
+		sb.append("_______________________________________________________________________________________________________________\n");
+		sb.append(String.format("%-102s", "| Statement") + "|Covered?|\n");
+		sb.append("|-----------------------------------------------------------------------------------------------------|-------|\n");
+		for (Integer hashCode : registeredStatements.keySet()) {
+			// System.out.println(hashCode);
+			
+			String methodName = registeredStatements.get(hashCode).statementString;
+			if (methodName.length() > MAXLENGTH) {
+				methodName = methodName.substring(0, 27) + "...";
+			}
+			if (methodName.length()>95) methodName = methodName.substring(90)+"...";
+			sb.append("| " + String.format("%-100s", methodName) + (executedStatements.containsKey(hashCode) ? "|   Y   |\n" : "|   N   |\n"));
+		}
+		sb.append("---------------------------------------------------------------------------------------------------------------\n");
+		return sb.toString();
+	}
+	
+	public static String returnAllBranches() {
+		StringBuffer sb = new StringBuffer("[Coverage of Each Branch]\n");
+		sb.append("_______________________________________________________________________________________________________________\n");
+		sb.append(String.format("%-102s", "Branch") + "|Covered?\n");
+		sb.append("|-----------------------------------------------------------------------------------------------------|-------|\n");
+		for (BranchInfo registeredBrcInfo : registeredBranches.keySet()) {
+			int srcHashCode = registeredBrcInfo.srcInfo.hashCode;
+			int dstHashCode = registeredBrcInfo.dstInfo.hashCode;
+			String srcString = registeredStatements.get(srcHashCode).statementString;
+			if (srcString.length()>88) srcString = srcString.substring(0,88)+"...";
+			String dstString = registeredStatements.get(dstHashCode).statementString;
+			if (dstString.length()>85) dstString = dstString.substring(0,85)+"...";
+			Boolean executed = executedBranches.containsKey(new AbstractMap.SimpleEntry<>(srcHashCode, dstHashCode));
+			sb.append("| Source: " + String.format("%-92s", srcString) + ((executed) ? "|   Y   |\n" : "|   N   |\n"));
+			sb.append("|   Target: " + String.format("%-90s", dstString) + "|       |\n");
+			
+		}
+		sb.append("---------------------------------------------------------------------------------------------------------------\n");
+		return sb.toString();
+		
+	}
+	
+	
+	
+	
+	
 		
 }
