@@ -30,3 +30,4 @@ The recommended folder structure is:
 - For task 2 and 3, run `${PROJECT_ROOT}scripts/instrument-run-test.sh` in project root folder.
 - Screen shots for task 1 are located in `${PROJECT_ROOT}/screenshots`.
 - Reports (Eclemma, My coverage, Comparison) are located in `${PROJECT_ROOT}/reports`.
+- Test suites (randoop) are located in `${PROJECT_ROOT}/src/test`.
