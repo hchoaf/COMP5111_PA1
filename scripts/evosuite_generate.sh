@@ -53,7 +53,22 @@ if [ ! -d "$ROOT_DIR"/raw-classes ]; then
 fi
 
 
-echo "Test Evosuite"
+# compile class under test
+echo "compiling castle.comp5111.assignment.cut.Subject ..."
 
-# java -jar "$ROOT_DIR"/lib/evosuite-1.2.0.jar -help \
-java -jar "$ROOT_DIR"/lib/evosuite-1.2.0.jar -class comp5111.assignment.cut.Subject -projectCP .
+javac -d "$ROOT_DIR"/raw-classes -g "$ROOT_DIR"/src/main/java/comp5111/assignment/cut/Subject.java
+
+
+echo "Test Evosuite"
+for i in 0 1
+do
+    echo "Generating Test Suite $i"
+
+    # java -jar "$ROOT_DIR"/lib/evosuite-1.2.0.jar -help \
+
+    java -jar "$ROOT_DIR"/lib/evosuite-1.2.0.jar -class comp5111.assignment.cut.Subject \
+        -projectCP "$ROOT_DIR"/raw-classes \
+        -criterion branch \
+        -Dtest_dir="$ROOT_DIR"/src/test/evosuite$i \
+        -Dreport_dir="$ROOT_DIR"/evosuite-reports/evosuite$i 
+done
