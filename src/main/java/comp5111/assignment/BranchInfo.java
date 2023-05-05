@@ -29,10 +29,10 @@ public class BranchInfo {
 		if (dstInfo != null && brcInfo.dstInfo == null) {
 			return false;
 		}
-		if (srcInfo.hashCode != brcInfo.srcInfo.hashCode) {
+		if (srcInfo.stmtHashCode != brcInfo.srcInfo.stmtHashCode) {
 			return false;
 		}
-		if (dstInfo.hashCode != brcInfo.dstInfo.hashCode) {
+		if (dstInfo.stmtHashCode != brcInfo.dstInfo.stmtHashCode) {
 			return false;
 		}
 		return true;

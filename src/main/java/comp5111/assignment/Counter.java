@@ -1,6 +1,7 @@
 package comp5111.assignment;
 
 import java.util.AbstractMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
@@ -11,6 +12,44 @@ import java.util.stream.Collectors;
 public class Counter {
 	
 	static final int MAXLENGTH = 100;
+	
+	static int testCaseNum = 0;
+	static int failedTestCases = 0;
+	static int passedTestCases = 0;
+	static int testCaseNumber = 0;
+	
+	
+	/*
+	static ConcurrentHashMap<Integer, HashSet<Integer>> failedMap = new ConcurrentHashMap<>();
+	static ConcurrentHashMap<Integer, HashSet<Integer>> passedMap = new ConcurrentHashMap<>();
+	
+	static void addToFailedMap(Integer stmtHashCode) {
+		System.out.println("addToFailedMap called");
+		HashSet<Integer> set = new HashSet<Integer>();
+		
+		if (failedMap.containsKey(stmtHashCode)) {
+			set = failedMap.get(stmtHashCode);
+		}
+		set.add(testCaseNum);
+		failedMap.put(stmtHashCode, set);
+		
+		
+	}
+	
+	static void addToPassedMap(Integer stmtHashCode) {
+		System.out.println("addToPassedMap called");
+		HashSet<Integer> set = new HashSet<Integer>();
+		
+		if (passedMap.containsKey(stmtHashCode)) {
+			set = passedMap.get(stmtHashCode);
+		}
+		set.add(testCaseNum);
+		passedMap.put(stmtHashCode, set);
+	}
+	*/
+	
+	
+	
 	
 	static ConcurrentHashMap<Integer, StatementInfo> registeredStatements = new ConcurrentHashMap<>();
 	
@@ -66,8 +105,8 @@ public class Counter {
 	public static int getExecutedBranchesCount() {
 		int count = 0;
 		for (BranchInfo registeredBrcInfo : registeredBranches.keySet()) {
-			int srcHashCode = registeredBrcInfo.srcInfo.hashCode;
-			int dstHashCode = registeredBrcInfo.dstInfo.hashCode;
+			int srcHashCode = registeredBrcInfo.srcInfo.stmtHashCode;
+			int dstHashCode = registeredBrcInfo.dstInfo.stmtHashCode;
 			if (srcHashCode != dstHashCode) {
 				if (executedBranches.containsKey(new AbstractMap.SimpleEntry<>(srcHashCode, dstHashCode))) count++;
 			}
@@ -78,8 +117,8 @@ public class Counter {
 	public static int getExecutedBranchesCount(String declaredClassName) {
 		int count = 0;
 		for (BranchInfo registeredBrcInfo : registeredBranches.keySet().stream().filter(e -> (e.srcInfo.declaringClassName == declaredClassName)).collect(Collectors.toList())) {
-			int srcHashCode = registeredBrcInfo.srcInfo.hashCode;
-			int dstHashCode = registeredBrcInfo.dstInfo.hashCode;
+			int srcHashCode = registeredBrcInfo.srcInfo.stmtHashCode;
+			int dstHashCode = registeredBrcInfo.dstInfo.stmtHashCode;
 			if (srcHashCode != dstHashCode) {
 				if (executedBranches.containsKey(new AbstractMap.SimpleEntry<>(srcHashCode, dstHashCode))) count++;
 			}
@@ -113,8 +152,8 @@ public class Counter {
 		sb.append(String.format("%-102s", "Branch") + "|Covered?\n");
 		sb.append("|-----------------------------------------------------------------------------------------------------|-------|\n");
 		for (BranchInfo registeredBrcInfo : registeredBranches.keySet()) {
-			int srcHashCode = registeredBrcInfo.srcInfo.hashCode;
-			int dstHashCode = registeredBrcInfo.dstInfo.hashCode;
+			int srcHashCode = registeredBrcInfo.srcInfo.stmtHashCode;
+			int dstHashCode = registeredBrcInfo.dstInfo.stmtHashCode;
 			String srcString = registeredStatements.get(srcHashCode).statementString;
 			if (srcString.length()>88) srcString = srcString.substring(0,88)+"...";
 			String dstString = registeredStatements.get(dstHashCode).statementString;

@@ -33,6 +33,9 @@ public class Instrumenter extends BodyTransformer{
 	
 	@Override
 	protected void internalTransform(Body body, String phase, Map options) {
+		// System.out.println("Internal Transform Function");
+		
+		
 		SootMethod method = body.getMethod();
 		String className = method.getDeclaringClass().getName();
 		
@@ -48,10 +51,10 @@ public class Instrumenter extends BodyTransformer{
 			int stmtHashCode = stmt.hashCode();
 			int stmtLineNumber = stmt.getJavaSourceStartLineNumber();
 			String stmtString = stmt.toString();
-			
-			StatementInfo stmtInfo = new StatementInfo(stmtHashCode, stmtLineNumber, stmtString, className);
+			String methodSignature = method.getSignature();
+			StatementInfo stmtInfo = new StatementInfo(stmtHashCode, stmtLineNumber, stmtString, className, methodSignature);
 			if (!Counter.registeredStatements.containsKey(stmt.hashCode())) {
-				Counter.registeredStatements.put(stmtInfo.hashCode, stmtInfo);
+				Counter.registeredStatements.put(stmtInfo.stmtHashCode, stmtInfo);
 			}
 		}
 		
@@ -67,13 +70,14 @@ public class Instrumenter extends BodyTransformer{
         			int srcHashCode = srcStmt.hashCode();
         			int srcLineNumber = srcStmt.getJavaSourceStartLineNumber();
         			String srcString = srcStmt.toString();
-        			StatementInfo srcInfo = new StatementInfo(srcHashCode, srcLineNumber, srcString, className);
+        			String methodSignature = method.getSignature();
+        			StatementInfo srcInfo = new StatementInfo(srcHashCode, srcLineNumber, srcString, className, methodSignature);
         			
         			Stmt dstStmt = (Stmt) successor;
         			int dstHashCode = dstStmt.hashCode();
         			int dstLineNumber = dstStmt.getJavaSourceStartLineNumber();
         			String dstString = dstStmt.toString();
-        			StatementInfo dstInfo = new StatementInfo(dstHashCode, dstLineNumber, dstString, className);
+        			StatementInfo dstInfo = new StatementInfo(dstHashCode, dstLineNumber, dstString, className, methodSignature);
         			BranchInfo brcInfo = new BranchInfo(srcInfo, dstInfo);
         			Counter.registeredBranches.put(brcInfo, 1);
         			targets.add(successor.hashCode());
