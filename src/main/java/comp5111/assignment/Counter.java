@@ -13,7 +13,6 @@ public class Counter {
 	
 	static final int MAXLENGTH = 100;
 	
-	static int testCaseNum = 0;
 	static int failedTestCases = 0;
 	static int passedTestCases = 0;
 	static int testCaseNumber = 0;
@@ -48,8 +47,14 @@ public class Counter {
 	}
 	*/
 	
-	
-	
+	static void resetMaps() {
+		registeredStatements.clear();
+		executedStatements.clear();
+		registeredBranches.clear();
+		executedBranches.clear();
+		previousStmtHashCode = null;
+	}
+	static ConcurrentHashMap<Integer, StatementInfo> allExecutedStatements = new ConcurrentHashMap<>();
 	
 	static ConcurrentHashMap<Integer, StatementInfo> registeredStatements = new ConcurrentHashMap<>();
 	
@@ -67,6 +72,7 @@ public class Counter {
 	public static void addToExecutedStatements(int hashCode) {
 		if (registeredStatements.containsKey(hashCode)) {
 			executedStatements.put(hashCode, registeredStatements.get(hashCode));
+			
 			if (previousStmtHashCode != null) {
 				Map.Entry<Integer, Integer> tmp = new AbstractMap.SimpleEntry<>(previousStmtHashCode, hashCode);
 				executedBranches.put(tmp, executedBranches.getOrDefault(tmp, 0) + 1);

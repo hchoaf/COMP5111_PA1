@@ -106,8 +106,13 @@ public class Assignment2 {
     	// System.out.println(Counter.failedMap);
     	System.out.println("##################################################################");
     	// System.out.println(Counter.successMap);
-    	System.out.println(ochiaiScore());
+    	// System.out.println(ochiaiScore());
+    	System.out.println(printFailingTestsByLineNumber());
     	System.out.println("Main Ended");
+    	
+    	
+    	
+    	
     	/*
 		for (final Map.Entry<Integer, StatementInfo> entry : Counter.executedStatements.entrySet()) {
 			System.out.print(entry.getValue().lineNumber);
@@ -125,16 +130,38 @@ public class Assignment2 {
 
     }
     
-    private static HashMap<Integer, Integer> calculateRanking(HashMap<Integer, Double> ochiaiScores) {
+    private static String printFailingTestsByLineNumber() {
+    	HashMap<Integer, HashSet<Integer>> target = new HashMap<>();
+    	
+    	for (final Map.Entry<Integer, StatementInfo> entry : Counter.executedStatements.entrySet()) {
+    		target.put(entry.getValue().lineNumber, getFailTestsRanByStmt(entry.getKey()));
+    	}
+    	
+    	StringBuilder s = new StringBuilder();
+    	
+    	HashMap<Integer, HashSet<Integer>> targetSorted = 
+    			target.entrySet().stream().sorted(Map.Entry.comparingByKey())
+    			.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
+    	
+    	for (final Map.Entry<Integer, HashSet<Integer>> entry : targetSorted.entrySet()) {
+    		s.append(entry.getKey());
+    		s.append("\t");
+    		s.append(entry.getValue());
+    		s.append("\n");
+    	}
+    	return s.toString();
+    }
+    
+    private static HashMap<Integer, Integer> calculateRanking(HashMap<Integer, Double> suspiciousScores) {
     	
     	HashMap<Integer, Integer> ochiaiRankings = new HashMap<Integer, Integer>();
     	
-    	ochiaiScores.keySet().stream().forEach(stmtHashCode -> {
+    	suspiciousScores.keySet().stream().forEach(stmtHashCode -> {
     		int N = 0;
     		int M = 0;
-    		for (final Map.Entry<Integer, Double> e: ochiaiScores.entrySet()) {
-    			if (e.getValue() > ochiaiScores.get(stmtHashCode)) N++;
-    			if (e.getValue() >= ochiaiScores.get(stmtHashCode)) M++;
+    		for (final Map.Entry<Integer, Double> e: suspiciousScores.entrySet()) {
+    			if (e.getValue() > suspiciousScores.get(stmtHashCode)) N++;
+    			if (e.getValue() >= suspiciousScores.get(stmtHashCode)) M++;
     		}
     		ochiaiRankings.put(stmtHashCode, (N+M+1)/2);
     	});
@@ -146,46 +173,86 @@ public class Assignment2 {
     	return ochiaiRankingsSorted;
     }
     
-    
-    
-    private static String ochiaiScore() {
-    	StringBuilder s = new StringBuilder();
-    	HashMap<Integer, Double> ochiaiScoreMap = new HashMap<>();
-    	int totalFailing = Counter.failedTestCases;
-    	int totalPassing = Counter.passedTestCases;
+    private static HashMap<Integer, Double> jaccardScore() {
+    	HashMap<Integer, Double> jaccardMap = new HashMap<>();
+    	int Nf = Counter.failedTestCases;
+    	int Ns = Counter.passedTestCases;
 
 		for (final Map.Entry<Integer, StatementInfo> entry : Counter.executedStatements.entrySet()) {
 			Integer stmtHashCode = entry.getKey();
-			int failingTestNum = getFailTestNumByStmt(stmtHashCode);
-			int passingTestNum = getPassTestNumByStmt(stmtHashCode);
-			Double ochiaiSimilarity = (failingTestNum / Math.sqrt(totalFailing * (failingTestNum + passingTestNum)));
+			int Nef = getFailTestNumByStmt(stmtHashCode);
+			int Nes = getPassTestNumByStmt(stmtHashCode);
+			double jaccardScore = (Nef / (Nf + Nes));
+			jaccardMap.put(stmtHashCode, jaccardScore);
+		}
+		
+		HashMap<Integer, Double> sortedJaccardMap = 
+				jaccardMap.entrySet().stream().sorted(Map.Entry.comparingByValue())
+				.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
+		return sortedJaccardMap;
+    	
+    }
+    
+    private static HashMap<Integer, Double> tarantulaScore() {
+    	HashMap<Integer, Double> tarantulaMap = new HashMap<>();
+    	int Nf = Counter.failedTestCases;
+    	int Ns = Counter.passedTestCases;
+
+		for (final Map.Entry<Integer, StatementInfo> entry : Counter.executedStatements.entrySet()) {
+			Integer stmtHashCode = entry.getKey();
+			int Nef = getFailTestNumByStmt(stmtHashCode);
+			int Nes = getPassTestNumByStmt(stmtHashCode);
+			double tarantulaScore = (Nef / Nf) / ((Nef / Nf) + (Nes / Ns));
+			tarantulaMap.put(stmtHashCode, tarantulaScore);
+		}
+		
+		HashMap<Integer, Double> sortedTarantulaMap = 
+				tarantulaMap.entrySet().stream().sorted(Map.Entry.comparingByValue())
+				.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
+		return sortedTarantulaMap;
+    	
+    }
+    
+    private static HashMap<Integer, Double> ampleScore() {
+    	HashMap<Integer, Double> ampleMap = new HashMap<>();
+    	int Nf = Counter.failedTestCases;
+    	int Ns = Counter.passedTestCases;
+
+		for (final Map.Entry<Integer, StatementInfo> entry : Counter.executedStatements.entrySet()) {
+			Integer stmtHashCode = entry.getKey();
+			int Nef = getFailTestNumByStmt(stmtHashCode);
+			int Nes = getPassTestNumByStmt(stmtHashCode);
+			double ampleScore = Math.abs((Nef / Nf) - (Nes / Ns));
+			ampleMap.put(stmtHashCode, ampleScore);
+		}
+		
+		HashMap<Integer, Double> sortedAmpleMap = 
+				ampleMap.entrySet().stream().sorted(Map.Entry.comparingByValue())
+				.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
+		return sortedAmpleMap;
+    	
+    	
+    }
+    
+    
+    private static HashMap<Integer, Double> ochiaiScore() {
+    	HashMap<Integer, Double> ochiaiScoreMap = new HashMap<>();
+    	int Nf = Counter.failedTestCases;
+    	int Ns = Counter.passedTestCases;
+
+		for (final Map.Entry<Integer, StatementInfo> entry : Counter.executedStatements.entrySet()) {
+			Integer stmtHashCode = entry.getKey();
+			int Nef = getFailTestNumByStmt(stmtHashCode);
+			int Nes = getPassTestNumByStmt(stmtHashCode);
+			Double ochiaiSimilarity = (Nef / Math.sqrt(Nf * (Nef + Nes)));
 			ochiaiScoreMap.put(stmtHashCode, ochiaiSimilarity);
 		}
 		
 		HashMap<Integer, Double> sortedOchiaiScoreMap = 
 				ochiaiScoreMap.entrySet().stream().sorted(Map.Entry.comparingByValue())
 				.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
-		
-		// System.out.println(sortedOchiaiScoreMap);
-		
-		for (final Map.Entry<Integer, Integer> entry : calculateRanking(ochiaiScoreMap).entrySet()) {
-			s.append(Counter.executedStatements.get(entry.getKey()).lineNumber);
-			s.append("\t");
-			s.append(Counter.executedStatements.get(entry.getKey()).methodSignature);
-			s.append("\t");
-			s.append(Counter.executedStatements.get(entry.getKey()).statementString);
-			s.append("\t");
-			s.append(ochiaiScoreMap.get(entry.getKey()));
-			s.append("\t");
-			s.append(entry.getValue());
-			s.append("\n");
-		}
-		
-		
-
-    	return s.toString();
+		return sortedOchiaiScoreMap;
     }
-    
     
     private static void instrumentWithSoot() {
         /*Set the soot-classpath to include the helper class and class to analyze*/
@@ -222,9 +289,6 @@ public class Assignment2 {
     		
     		junit.addListener(new RunListener() {
     			public void testStarted(Description description) {
-
-    				testCaseNum++;
-    			
     				
     				addTestDescription(description);
     				addToTestPassFailMap(true);
@@ -242,6 +306,7 @@ public class Assignment2 {
     				for (final Map.Entry<Integer, StatementInfo> entry : Counter.executedStatements.entrySet()) {
     					addToTestStmtMap(entry.getValue().stmtHashCode);
     				}
+    				testCaseNum++;
     			}
     			
     		});
@@ -252,7 +317,7 @@ public class Assignment2 {
     	} catch (ClassNotFoundException e) {
     		e.printStackTrace();
     	} finally {
-    		System.out.printf("Total : %d\n", Counter.testCaseNum);
+    		System.out.printf("Total : %d\n", testCaseNum);
     		System.out.printf("Failed : %d\n", Counter.failedTestCases);
     		System.out.printf("Finished : %d\n", Counter.passedTestCases);
     	}
