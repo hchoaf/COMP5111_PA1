@@ -30,6 +30,14 @@ public class Assignment2 {
 	private static final String EXTENSION = ".tsv";
 	private static final String REPORT_DIR = ROOT_DIR + "/assignment2-reports";
 	private static final String FILENAME_PREFIX = "spectrum_fl_";
+	private static final String[] TEST_SUITE_CLASSES = {"Regression_0_Test", "Regression_1_Test", "Regression_2_Test", "Subject_FaultRevealing0_ESTest", "Subject_FaultRevealing1_ESTest", "Subject_FaultRevealing2_ESTest"};
+	private static final String[] TEST_SUITE_NAMES = {"randoop0", "randoop1", "randoop2", "evosuite0", "evosuite1", "evosuite2"};
+
+	// private static final String[] TEST_SUITE_CLASSES = {"Subject_FaultRevealing0_ESTest", "Subject_FaultRevealing1_ESTest", "Subject_FaultRevealing2_ESTest"};
+	// private static final String[] TEST_SUITE_NAMES = {"evosuite0", "evosuite1", "evosuite2"};
+	
+	private static final String[] ALGO_NAMES = {"ochiai", "jaccard", "tarantula", "ample"};
+	
 	
 	// Constants for class names
 	private static final String PACKAGE_NAME = "comp5111.assignment.cut";
@@ -37,12 +45,72 @@ public class Assignment2 {
 	private static final String CUT_PATH = "./raw-classes";
 	private static final String TESTCLASS_PATH = "./target/classes";
 	private static final String CLASS_PATH_SEPARATOR = (System.getProperty("os.name").toLowerCase().contains("win")) ? ";" : ":";
-
+	
+	
 	static final ConcurrentHashMap<Integer, Description> testDescriptionMap = new ConcurrentHashMap<>();
 	static final ConcurrentHashMap<Integer, HashSet<Integer>> testStmtMap = new ConcurrentHashMap<>();
 	static final ConcurrentHashMap<Integer, Boolean> testPassFailMap = new ConcurrentHashMap<>();
 	static int testCaseNum = 0;
+	static int failedTestCases = 0;
+	static int totalTestCases = 0;
+
 	
+    public static void main(String[] args) {
+        // TODO we decide to not restrict how you implement main class. So do as you wish to complete assignment 2.
+    	
+    	System.out.println("Main Started");
+    	// System.out.println(ROOT_DIR + "/REPORTS");
+    	// createTSV("ochiai", "randoop0", "");
+    	// createReportDirectory("ochiai");
+    	
+    	
+    	instrumentWithSoot();
+    	
+    	System.out.println("##################################################################");
+    	// System.out.println(Counter.failedMap);
+    	System.out.println("##################################################################");
+    	// System.out.println(Counter.successMap);
+    	// System.out.println(ochiaiScore());
+    	System.out.println(printFailingTestsByLineNumber());
+    	System.out.println("Main Ended");
+    	for (String algoName : ALGO_NAMES) {
+    		for (int i = 0; i<TEST_SUITE_NAMES.length; i++) {
+    			String testClassName = TEST_SUITE_CLASSES[i];
+    			runJunitTests(PACKAGE_NAME + "." + testClassName);
+    			
+    			createTSV(algoName, TEST_SUITE_NAMES[i], printContents(algoName));
+    			
+    			
+    			
+    			
+    			clearEverything();
+    		}
+    	}
+    	/*
+		for (final Map.Entry<Integer, StatementInfo> entry : Counter.executedStatements.entrySet()) {
+			System.out.print(entry.getValue().lineNumber);
+			System.out.println(" - " + entry.getValue().statementString);
+			System.out.printf("Total Passed: %d\n", getPassTestsRanByStmt(entry.getKey()).size());
+			System.out.println(getPassTestsRanByStmt(entry.getKey()));
+			System.out.printf("Total Failed: %d\n", getFailTestsRanByStmt(entry.getKey()).size());
+			System.out.println(getFailTestsRanByStmt(entry.getKey()));
+			System.out.println();
+		}
+		*/
+
+    }
+    
+    private static void clearEverything() {
+    	Counter.resetMaps();
+    	testDescriptionMap.clear();
+    	testStmtMap.clear();
+    	testPassFailMap.clear();
+    	testCaseNum = 0;
+    	failedTestCases = 0;
+    	totalTestCases = 0;
+    	
+    }
+    
 
 	static void addToTestStmtMap(Integer stmtHashCode) {
 		testStmtMap.putIfAbsent(stmtHashCode, new HashSet<>());
@@ -83,53 +151,40 @@ public class Assignment2 {
 		
 	}
 	
-	
-	
-	
-    public static void main(String[] args) {
-        // TODO we decide to not restrict how you implement main class. So do as you wish to complete assignment 2.
-    	
-    	System.out.println("Main Started");
-    	// System.out.println(ROOT_DIR + "/REPORTS");
-    	// createTSV("ochiai", "randoop0", "");
-    	// createReportDirectory("ochiai");
-    	
-    	String testClassName = "";
-    	testClassName = "Subject_FaultRevealing0_ESTest";
-    	
-    	instrumentWithSoot();
-    	runJunitTests(PACKAGE_NAME + "." + testClassName);
-    	
-    	
-    	
-    	System.out.println("##################################################################");
-    	// System.out.println(Counter.failedMap);
-    	System.out.println("##################################################################");
-    	// System.out.println(Counter.successMap);
-    	// System.out.println(ochiaiScore());
-    	System.out.println(printFailingTestsByLineNumber());
-    	System.out.println("Main Ended");
-    	
-    	
-    	
-    	
-    	/*
-		for (final Map.Entry<Integer, StatementInfo> entry : Counter.executedStatements.entrySet()) {
-			System.out.print(entry.getValue().lineNumber);
-			System.out.println(" - " + entry.getValue().statementString);
-			System.out.printf("Total Passed: %d\n", getPassTestsRanByStmt(entry.getKey()).size());
-			System.out.println(getPassTestsRanByStmt(entry.getKey()));
-			System.out.printf("Total Failed: %d\n", getFailTestsRanByStmt(entry.getKey()).size());
-			System.out.println(getFailTestsRanByStmt(entry.getKey()));
-			System.out.println();
+	private static String printContents(String algoName) {
+		HashMap<Integer, Double> suspiciousScores = new HashMap<>();
+		if (algoName == "ochiai") {
+			suspiciousScores = ochiaiScore();
+		} else if (algoName == "jaccard") {
+			suspiciousScores = jaccardScore();
+		} else if (algoName == "ample") {
+			suspiciousScores = ampleScore();
+		} else if (algoName == "tarantula") {
+			suspiciousScores = tarantulaScore();
+		} else {
+			throw new IllegalArgumentException("Wrong algo name");
 		}
-		*/
-    	
-    	
-    	
-
-    }
-    
+		
+		HashMap<Integer, Integer> sortedRankings = calculateRanking(suspiciousScores);
+		
+		
+		StringBuilder s = new StringBuilder();
+		for (final Map.Entry<Integer, Integer> entry : sortedRankings.entrySet()) {
+			int stmtHashCode = entry.getKey();
+			s.append(Counter.executedStatements.get(stmtHashCode).methodSignature);
+			s.append("\t");
+			s.append(Counter.executedStatements.get(stmtHashCode).statementString);
+			s.append("\t");
+			s.append(String.format("%.8f\t", suspiciousScores.get(stmtHashCode)));
+			s.append(entry.getValue());
+			s.append("\n");
+			
+			
+		}
+		return s.toString();
+	}
+	
+	
     private static String printFailingTestsByLineNumber() {
     	HashMap<Integer, HashSet<Integer>> target = new HashMap<>();
     	
@@ -154,7 +209,7 @@ public class Assignment2 {
     
     private static HashMap<Integer, Integer> calculateRanking(HashMap<Integer, Double> suspiciousScores) {
     	
-    	HashMap<Integer, Integer> ochiaiRankings = new HashMap<Integer, Integer>();
+    	HashMap<Integer, Integer> rankings = new HashMap<Integer, Integer>();
     	
     	suspiciousScores.keySet().stream().forEach(stmtHashCode -> {
     		int N = 0;
@@ -163,20 +218,20 @@ public class Assignment2 {
     			if (e.getValue() > suspiciousScores.get(stmtHashCode)) N++;
     			if (e.getValue() >= suspiciousScores.get(stmtHashCode)) M++;
     		}
-    		ochiaiRankings.put(stmtHashCode, (N+M+1)/2);
+    		rankings.put(stmtHashCode, (N+M+1)/2);
     	});
     	
 
-    	HashMap<Integer, Integer> ochiaiRankingsSorted = 
-    			ochiaiRankings.entrySet().stream().sorted(Map.Entry.comparingByValue())
+    	HashMap<Integer, Integer> rankingsSorted = 
+    			rankings.entrySet().stream().sorted(Map.Entry.comparingByValue())
     			.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
-    	return ochiaiRankingsSorted;
+    	return rankingsSorted;
     }
     
     private static HashMap<Integer, Double> jaccardScore() {
     	HashMap<Integer, Double> jaccardMap = new HashMap<>();
-    	int Nf = Counter.failedTestCases;
-    	int Ns = Counter.passedTestCases;
+    	int Nf = failedTestCases;
+    	int Ns = totalTestCases - failedTestCases;
 
 		for (final Map.Entry<Integer, StatementInfo> entry : Counter.executedStatements.entrySet()) {
 			Integer stmtHashCode = entry.getKey();
@@ -195,14 +250,16 @@ public class Assignment2 {
     
     private static HashMap<Integer, Double> tarantulaScore() {
     	HashMap<Integer, Double> tarantulaMap = new HashMap<>();
-    	int Nf = Counter.failedTestCases;
-    	int Ns = Counter.passedTestCases;
+    	int Nf = failedTestCases;
+    	int Ns = totalTestCases - failedTestCases;
 
 		for (final Map.Entry<Integer, StatementInfo> entry : Counter.executedStatements.entrySet()) {
 			Integer stmtHashCode = entry.getKey();
 			int Nef = getFailTestNumByStmt(stmtHashCode);
 			int Nes = getPassTestNumByStmt(stmtHashCode);
-			double tarantulaScore = (Nef / Nf) / ((Nef / Nf) + (Nes / Ns));
+			double firstTerm = Nef/Nf;
+			double secondTerm = Nes/Ns;
+			double tarantulaScore = firstTerm / (firstTerm + secondTerm);
 			tarantulaMap.put(stmtHashCode, tarantulaScore);
 		}
 		
@@ -215,14 +272,17 @@ public class Assignment2 {
     
     private static HashMap<Integer, Double> ampleScore() {
     	HashMap<Integer, Double> ampleMap = new HashMap<>();
-    	int Nf = Counter.failedTestCases;
-    	int Ns = Counter.passedTestCases;
+    	int Nf = failedTestCases;
+    	int Ns = totalTestCases - failedTestCases;
 
 		for (final Map.Entry<Integer, StatementInfo> entry : Counter.executedStatements.entrySet()) {
 			Integer stmtHashCode = entry.getKey();
 			int Nef = getFailTestNumByStmt(stmtHashCode);
 			int Nes = getPassTestNumByStmt(stmtHashCode);
-			double ampleScore = Math.abs((Nef / Nf) - (Nes / Ns));
+			double firstTerm = Nef / Nf;
+			double secondTerm = Nes / Ns;
+			// System.out.println(firstTerm);
+			double ampleScore = Math.abs(firstTerm - secondTerm);
 			ampleMap.put(stmtHashCode, ampleScore);
 		}
 		
@@ -237,8 +297,8 @@ public class Assignment2 {
     
     private static HashMap<Integer, Double> ochiaiScore() {
     	HashMap<Integer, Double> ochiaiScoreMap = new HashMap<>();
-    	int Nf = Counter.failedTestCases;
-    	int Ns = Counter.passedTestCases;
+    	int Nf = failedTestCases;
+    	int Ns = totalTestCases - failedTestCases;
 
 		for (final Map.Entry<Integer, StatementInfo> entry : Counter.executedStatements.entrySet()) {
 			Integer stmtHashCode = entry.getKey();
@@ -289,37 +349,31 @@ public class Assignment2 {
     		
     		junit.addListener(new RunListener() {
     			public void testStarted(Description description) {
-    				
     				addTestDescription(description);
     				addToTestPassFailMap(true);
     				
-    				
     			}
     			public synchronized void testFailure(Failure failure) {
-    				Counter.failedTestCases++;
+    				failedTestCases++;
     				addToTestPassFailMap(false);
-    				
     			}
     			public void testFinished(Description description) {
-    				Counter.passedTestCases++;
+    				totalTestCases++;
     				
     				for (final Map.Entry<Integer, StatementInfo> entry : Counter.executedStatements.entrySet()) {
     					addToTestStmtMap(entry.getValue().stmtHashCode);
     				}
     				testCaseNum++;
     			}
-    			
     		});
-    		
-    		
     		System.out.println("Running JUnit test: " + testClass.getName());
     		junit.run(testClass);
     	} catch (ClassNotFoundException e) {
     		e.printStackTrace();
     	} finally {
     		System.out.printf("Total : %d\n", testCaseNum);
-    		System.out.printf("Failed : %d\n", Counter.failedTestCases);
-    		System.out.printf("Finished : %d\n", Counter.passedTestCases);
+    		System.out.printf("Failed : %d\n", failedTestCases);
+    		System.out.printf("Finished : %d\n", totalTestCases);
     	}
     }
     
@@ -330,11 +384,12 @@ public class Assignment2 {
     	try {
     		FileWriter fs = new FileWriter(REPORT_DIR + "/" + algoName + "/" 
     				+ FILENAME_PREFIX + algoName + "_" + suiteName + EXTENSION);
-    		
+    		fs.write(String.format("Ranking and Score by %s algorithm\n", algoName));
     		fs.write("Method Signature\tStatement\tSuspicious Score\tRanking\n");
-    		fs.write("Dummy Method\tasfasdfasfsafasfasfsf\t0.13123\t1");
+    		fs.write(content);
     		fs.close();
-    		
+    		System.out.println("Report Created in : " + REPORT_DIR + "/" + algoName + "/" 
+    				+ FILENAME_PREFIX + algoName + "_" + suiteName + EXTENSION);
     		
     	} catch (IOException e) {
     		e.printStackTrace();

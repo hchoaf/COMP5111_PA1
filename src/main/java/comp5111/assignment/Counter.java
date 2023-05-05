@@ -13,9 +13,6 @@ public class Counter {
 	
 	static final int MAXLENGTH = 100;
 	
-	static int failedTestCases = 0;
-	static int passedTestCases = 0;
-	static int testCaseNumber = 0;
 	
 	
 	/*
@@ -48,9 +45,7 @@ public class Counter {
 	*/
 	
 	static void resetMaps() {
-		registeredStatements.clear();
 		executedStatements.clear();
-		registeredBranches.clear();
 		executedBranches.clear();
 		previousStmtHashCode = null;
 	}
