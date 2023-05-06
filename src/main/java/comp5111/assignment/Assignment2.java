@@ -32,7 +32,7 @@ public class Assignment2 {
 	private static final String FILENAME_PREFIX = "spectrum_fl_";
 	private static final String[] TEST_SUITE_CLASSES = {"Regression_0_Test", "Regression_1_Test", "Regression_2_Test", "Subject_FaultRevealing0_ESTest", "Subject_FaultRevealing1_ESTest", "Subject_FaultRevealing2_ESTest"};
 	private static final String[] TEST_SUITE_NAMES = {"randoop0", "randoop1", "randoop2", "evosuite0", "evosuite1", "evosuite2"};
-	private static final int MAX_LENGTH = 30;
+	private static final int MAX_LENGTH = 100;
 
 	// private static final String[] TEST_SUITE_CLASSES = {"Subject_FaultRevealing0_ESTest", "Subject_FaultRevealing1_ESTest", "Subject_FaultRevealing2_ESTest"};
 	// private static final String[] TEST_SUITE_NAMES = {"evosuite0", "evosuite1", "evosuite2"};
@@ -67,20 +67,16 @@ public class Assignment2 {
     	
     	instrumentWithSoot();
     	
-    	System.out.println("##################################################################");
-    	// System.out.println(Counter.failedMap);
-    	System.out.println("##################################################################");
-    	// System.out.println(Counter.successMap);
-    	// System.out.println(ochiaiScore());
+
+
+    	String testClassName = TEST_SUITE_CLASSES[4];
+    	String algoName = "ochiai";
+    	String fileName = "evosuite1";
+    	
+    	runJunitTests(PACKAGE_NAME + "." + testClassName);
+    	createTSV(algoName, fileName, printContents(algoName));
+    	System.out.println(printFailingTestsByLineNumber());
     	/*
-    	// String testClassName = TEST_SUITE_CLASSES[3];
-    	// String algoName = "ochiai";
-    	// String fileName = "evosuite0";
-    	
-    	// runJunitTests(PACKAGE_NAME + "." + testClassName);
-    	// createTSV(algoName, fileName, printContents(algoName));
-    	 * */
-    	
     	System.out.println("Main Ended");
     	for (String algoName : ALGO_NAMES) {
     		for (int i = 0; i<TEST_SUITE_NAMES.length; i++) {
@@ -95,19 +91,9 @@ public class Assignment2 {
     			clearEverything();
     		}
     	}
+    	*/
     	
-    	// System.out.println(printFailingTestsByLineNumber());
-    	/*
-		for (final Map.Entry<Integer, StatementInfo> entry : Counter.allExecutedStatements.entrySet()) {
-			System.out.print(entry.getValue().lineNumber);
-			System.out.println(" - " + entry.getValue().statementString);
-			System.out.printf("Total Passed: %d\n", getPassTestsRanByStmt(entry.getKey()).size());
-			System.out.println(getPassTestsRanByStmt(entry.getKey()));
-			System.out.printf("Total Failed: %d\n", getFailTestsRanByStmt(entry.getKey()).size());
-			System.out.println(getFailTestsRanByStmt(entry.getKey()));
-			System.out.println();
-		}
-		*/
+    	
 
     }
     
@@ -210,8 +196,8 @@ public class Assignment2 {
     	for (final Map.Entry<Integer, Integer> entry : stmtLineNumberMapSorted.entrySet()) {
     		s.append(String.format("%1$-5s\t", entry.getValue().toString()));
     		String stmtString = Counter.allExecutedStatements.get(entry.getKey()).statementString;
-    		if (stmtString.length() > 30) {
-    			s.append(String.format("%s\t", stmtString.substring(0, 30)));
+    		if (stmtString.length() > MAX_LENGTH) {
+    			s.append(String.format("%s\t", stmtString.substring(0, MAX_LENGTH)));
     		} else {
     			s.append(String.format("%1$-"+MAX_LENGTH+"s\t", Counter.allExecutedStatements.get(entry.getKey()).statementString));
     		}
