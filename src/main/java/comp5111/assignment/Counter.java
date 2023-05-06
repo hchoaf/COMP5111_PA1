@@ -48,11 +48,11 @@ public class Counter {
 		executedStatements.clear();
 		executedBranches.clear();
 		previousStmtHashCode = null;
+		allExecutedStatements.clear();
 	}
 	static ConcurrentHashMap<Integer, StatementInfo> allExecutedStatements = new ConcurrentHashMap<>();
 	
 	static ConcurrentHashMap<Integer, StatementInfo> registeredStatements = new ConcurrentHashMap<>();
-	
 	static ConcurrentHashMap<Integer, StatementInfo> executedStatements = new ConcurrentHashMap<>();
 	
 
@@ -67,6 +67,7 @@ public class Counter {
 	public static void addToExecutedStatements(int hashCode) {
 		if (registeredStatements.containsKey(hashCode)) {
 			executedStatements.put(hashCode, registeredStatements.get(hashCode));
+			allExecutedStatements.put(hashCode, registeredStatements.get(hashCode));
 			
 			if (previousStmtHashCode != null) {
 				Map.Entry<Integer, Integer> tmp = new AbstractMap.SimpleEntry<>(previousStmtHashCode, hashCode);

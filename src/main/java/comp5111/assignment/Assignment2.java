@@ -32,6 +32,7 @@ public class Assignment2 {
 	private static final String FILENAME_PREFIX = "spectrum_fl_";
 	private static final String[] TEST_SUITE_CLASSES = {"Regression_0_Test", "Regression_1_Test", "Regression_2_Test", "Subject_FaultRevealing0_ESTest", "Subject_FaultRevealing1_ESTest", "Subject_FaultRevealing2_ESTest"};
 	private static final String[] TEST_SUITE_NAMES = {"randoop0", "randoop1", "randoop2", "evosuite0", "evosuite1", "evosuite2"};
+	private static final int MAX_LENGTH = 30;
 
 	// private static final String[] TEST_SUITE_CLASSES = {"Subject_FaultRevealing0_ESTest", "Subject_FaultRevealing1_ESTest", "Subject_FaultRevealing2_ESTest"};
 	// private static final String[] TEST_SUITE_NAMES = {"evosuite0", "evosuite1", "evosuite2"};
@@ -71,7 +72,15 @@ public class Assignment2 {
     	System.out.println("##################################################################");
     	// System.out.println(Counter.successMap);
     	// System.out.println(ochiaiScore());
-    	System.out.println(printFailingTestsByLineNumber());
+    	/*
+    	// String testClassName = TEST_SUITE_CLASSES[3];
+    	// String algoName = "ochiai";
+    	// String fileName = "evosuite0";
+    	
+    	// runJunitTests(PACKAGE_NAME + "." + testClassName);
+    	// createTSV(algoName, fileName, printContents(algoName));
+    	 * */
+    	
     	System.out.println("Main Ended");
     	for (String algoName : ALGO_NAMES) {
     		for (int i = 0; i<TEST_SUITE_NAMES.length; i++) {
@@ -86,8 +95,10 @@ public class Assignment2 {
     			clearEverything();
     		}
     	}
+    	
+    	// System.out.println(printFailingTestsByLineNumber());
     	/*
-		for (final Map.Entry<Integer, StatementInfo> entry : Counter.executedStatements.entrySet()) {
+		for (final Map.Entry<Integer, StatementInfo> entry : Counter.allExecutedStatements.entrySet()) {
 			System.out.print(entry.getValue().lineNumber);
 			System.out.println(" - " + entry.getValue().statementString);
 			System.out.printf("Total Passed: %d\n", getPassTestsRanByStmt(entry.getKey()).size());
@@ -171,9 +182,9 @@ public class Assignment2 {
 		StringBuilder s = new StringBuilder();
 		for (final Map.Entry<Integer, Integer> entry : sortedRankings.entrySet()) {
 			int stmtHashCode = entry.getKey();
-			s.append(Counter.executedStatements.get(stmtHashCode).methodSignature);
+			s.append(Counter.allExecutedStatements.get(stmtHashCode).methodSignature);
 			s.append("\t");
-			s.append(Counter.executedStatements.get(stmtHashCode).statementString);
+			s.append(Counter.allExecutedStatements.get(stmtHashCode).statementString);
 			s.append("\t");
 			s.append(String.format("%.8f\t", suspiciousScores.get(stmtHashCode)));
 			s.append(entry.getValue());
@@ -186,24 +197,28 @@ public class Assignment2 {
 	
 	
     private static String printFailingTestsByLineNumber() {
-    	HashMap<Integer, HashSet<Integer>> target = new HashMap<>();
-    	
-    	for (final Map.Entry<Integer, StatementInfo> entry : Counter.executedStatements.entrySet()) {
-    		target.put(entry.getValue().lineNumber, getFailTestsRanByStmt(entry.getKey()));
+    	StringBuilder s = new StringBuilder();
+    	HashMap<Integer, Integer> stmtLineNumberMap = new HashMap<>();
+    	for (final Map.Entry<Integer, StatementInfo> entry : Counter.allExecutedStatements.entrySet()) {
+    		stmtLineNumberMap.put(entry.getKey(), entry.getValue().lineNumber);
     	}
     	
-    	StringBuilder s = new StringBuilder();
-    	
-    	HashMap<Integer, HashSet<Integer>> targetSorted = 
-    			target.entrySet().stream().sorted(Map.Entry.comparingByKey())
+    	HashMap<Integer, Integer> stmtLineNumberMapSorted = 
+    			stmtLineNumberMap.entrySet().stream().sorted(Map.Entry.comparingByValue())
     			.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
-    	
-    	for (final Map.Entry<Integer, HashSet<Integer>> entry : targetSorted.entrySet()) {
-    		s.append(entry.getKey());
-    		s.append("\t");
-    		s.append(entry.getValue());
+    			
+    	for (final Map.Entry<Integer, Integer> entry : stmtLineNumberMapSorted.entrySet()) {
+    		s.append(String.format("%1$-5s\t", entry.getValue().toString()));
+    		String stmtString = Counter.allExecutedStatements.get(entry.getKey()).statementString;
+    		if (stmtString.length() > 30) {
+    			s.append(String.format("%s\t", stmtString.substring(0, 30)));
+    		} else {
+    			s.append(String.format("%1$-"+MAX_LENGTH+"s\t", Counter.allExecutedStatements.get(entry.getKey()).statementString));
+    		}
+    		s.append(getFailTestsRanByStmt(entry.getKey()));
     		s.append("\n");
     	}
+    	
     	return s.toString();
     }
     
@@ -233,7 +248,7 @@ public class Assignment2 {
     	int Nf = failedTestCases;
     	int Ns = totalTestCases - failedTestCases;
 
-		for (final Map.Entry<Integer, StatementInfo> entry : Counter.executedStatements.entrySet()) {
+		for (final Map.Entry<Integer, StatementInfo> entry : Counter.allExecutedStatements.entrySet()) {
 			Integer stmtHashCode = entry.getKey();
 			int Nef = getFailTestNumByStmt(stmtHashCode);
 			int Nes = getPassTestNumByStmt(stmtHashCode);
@@ -253,7 +268,7 @@ public class Assignment2 {
     	int Nf = failedTestCases;
     	int Ns = totalTestCases - failedTestCases;
 
-		for (final Map.Entry<Integer, StatementInfo> entry : Counter.executedStatements.entrySet()) {
+		for (final Map.Entry<Integer, StatementInfo> entry : Counter.allExecutedStatements.entrySet()) {
 			Integer stmtHashCode = entry.getKey();
 			int Nef = getFailTestNumByStmt(stmtHashCode);
 			int Nes = getPassTestNumByStmt(stmtHashCode);
@@ -275,7 +290,7 @@ public class Assignment2 {
     	int Nf = failedTestCases;
     	int Ns = totalTestCases - failedTestCases;
 
-		for (final Map.Entry<Integer, StatementInfo> entry : Counter.executedStatements.entrySet()) {
+		for (final Map.Entry<Integer, StatementInfo> entry : Counter.allExecutedStatements.entrySet()) {
 			Integer stmtHashCode = entry.getKey();
 			int Nef = getFailTestNumByStmt(stmtHashCode);
 			int Nes = getPassTestNumByStmt(stmtHashCode);
@@ -300,7 +315,7 @@ public class Assignment2 {
     	int Nf = failedTestCases;
     	int Ns = totalTestCases - failedTestCases;
 
-		for (final Map.Entry<Integer, StatementInfo> entry : Counter.executedStatements.entrySet()) {
+		for (final Map.Entry<Integer, StatementInfo> entry : Counter.allExecutedStatements.entrySet()) {
 			Integer stmtHashCode = entry.getKey();
 			int Nef = getFailTestNumByStmt(stmtHashCode);
 			int Nes = getPassTestNumByStmt(stmtHashCode);
@@ -349,6 +364,7 @@ public class Assignment2 {
     		
     		junit.addListener(new RunListener() {
     			public void testStarted(Description description) {
+    				Counter.executedStatements.clear();
     				addTestDescription(description);
     				addToTestPassFailMap(true);
     				
@@ -394,7 +410,6 @@ public class Assignment2 {
     	} catch (IOException e) {
     		e.printStackTrace();
     	}
-    	
     }
     
     private static void createReportDirectory(String algoName) {
