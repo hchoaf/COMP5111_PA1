@@ -5,6 +5,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -46,6 +47,7 @@ public class Assignment2 {
 	private static final String CUT_PATH = "./raw-classes";
 	private static final String TESTCLASS_PATH = "./target/classes";
 	private static final String CLASS_PATH_SEPARATOR = (System.getProperty("os.name").toLowerCase().contains("win")) ? ";" : ":";
+	private static final String REFINED_PREFIX = "Refined";
 	
 	
 	static final ConcurrentHashMap<Integer, Description> testDescriptionMap = new ConcurrentHashMap<>();
@@ -54,6 +56,7 @@ public class Assignment2 {
 	static int testCaseNum = 0;
 	static int failedTestCases = 0;
 	static int totalTestCases = 0;
+	
 
 	
     public static void main(String[] args) {
@@ -69,13 +72,16 @@ public class Assignment2 {
     	
 
 
-    	String testClassName = TEST_SUITE_CLASSES[4];
+    	String testClassName = REFINED_PREFIX + "_" + TEST_SUITE_CLASSES[3];
     	String algoName = "ochiai";
-    	String fileName = "evosuite1";
+    	String fileName = "evosuite0";
     	
     	runJunitTests(PACKAGE_NAME + "." + testClassName);
-    	createTSV(algoName, fileName, printContents(algoName));
-    	System.out.println(printFailingTestsByLineNumber());
+    	createTSV(algoName, fileName, printContents(algoName), true);
+    	System.out.println(printContents(algoName));
+    	// System.out.println(printFailingTestsByLineNumber());
+    	
+    	
     	/*
     	System.out.println("Main Ended");
     	for (String algoName : ALGO_NAMES) {
@@ -149,6 +155,9 @@ public class Assignment2 {
 	}
 	
 	private static String printContents(String algoName) {
+		
+		
+		
 		HashMap<Integer, Double> suspiciousScores = new HashMap<>();
 		if (algoName == "ochiai") {
 			suspiciousScores = ochiaiScore();
@@ -161,22 +170,26 @@ public class Assignment2 {
 		} else {
 			throw new IllegalArgumentException("Wrong algo name");
 		}
+		ArrayList<ReportData> reportContents = new ArrayList<>();
 		
 		HashMap<Integer, Integer> sortedRankings = calculateRanking(suspiciousScores);
+		for (final Map.Entry<Integer, Integer> entry : sortedRankings.entrySet()) {
+			int stmtHashCode = entry.getKey();
+			ReportData reportData = new ReportData();
+			reportData.lineNumber = Counter.allExecutedStatements.get(stmtHashCode).lineNumber;
+			reportData.methodSignature = Counter.allExecutedStatements.get(stmtHashCode).methodSignature;
+			reportData.statementString = Counter.allExecutedStatements.get(stmtHashCode).statementString;
+			reportData.suspiciousScore = suspiciousScores.get(stmtHashCode);
+			reportData.ranking = entry.getValue();
+			reportContents.add(reportData);
+			
+		}
+		Collections.sort(reportContents, new ReportData.ReportDataComparator());
 		
 		
 		StringBuilder s = new StringBuilder();
-		for (final Map.Entry<Integer, Integer> entry : sortedRankings.entrySet()) {
-			int stmtHashCode = entry.getKey();
-			s.append(Counter.allExecutedStatements.get(stmtHashCode).methodSignature);
-			s.append("\t");
-			s.append(Counter.allExecutedStatements.get(stmtHashCode).statementString);
-			s.append("\t");
-			s.append(String.format("%.8f\t", suspiciousScores.get(stmtHashCode)));
-			s.append(entry.getValue());
-			s.append("\n");
-			
-			
+		for (ReportData reportData : reportContents) {
+			s.append(reportData.toString());
 		}
 		return s.toString();
 	}
@@ -381,17 +394,21 @@ public class Assignment2 {
     
     
     
-    private static void createTSV(String algoName, String suiteName, String content) {
-    	createReportDirectory(algoName);
+    private static void createTSV(String algoName, String suiteName, String content, Boolean refined) {
+		String fileDir = REPORT_DIR + "/" + algoName + "/" + FILENAME_PREFIX + algoName + "_" + suiteName + EXTENSION;
+    	if (refined) {
+    		createReportDirectory(algoName + "_" + REFINED_PREFIX);
+    		fileDir = REPORT_DIR + "/" + algoName + "_" + REFINED_PREFIX + "/" + FILENAME_PREFIX + algoName + "_" + REFINED_PREFIX + "_" + suiteName + EXTENSION;
+    	} else {
+    		createReportDirectory(algoName);
+    	}
     	try {
-    		FileWriter fs = new FileWriter(REPORT_DIR + "/" + algoName + "/" 
-    				+ FILENAME_PREFIX + algoName + "_" + suiteName + EXTENSION);
+    		FileWriter fs = new FileWriter(fileDir);
     		fs.write(String.format("Ranking and Score by %s algorithm\n", algoName));
     		fs.write("Method Signature\tStatement\tSuspicious Score\tRanking\n");
     		fs.write(content);
     		fs.close();
-    		System.out.println("Report Created in : " + REPORT_DIR + "/" + algoName + "/" 
-    				+ FILENAME_PREFIX + algoName + "_" + suiteName + EXTENSION);
+    		System.out.println(fileDir);
     		
     	} catch (IOException e) {
     		e.printStackTrace();
