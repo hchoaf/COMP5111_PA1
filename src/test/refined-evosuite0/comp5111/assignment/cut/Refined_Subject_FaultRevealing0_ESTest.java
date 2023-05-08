@@ -1,30 +1,30 @@
 package comp5111.assignment.cut;
 
-import static org.junit.Assert.*;
-
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
+import static org.junit.jupiter.api.Assertions.assertAll;
 import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
 
 public class Refined_Subject_FaultRevealing0_ESTest extends Subject_FaultRevealing0_ESTest {
 
 	@Test
 	public void myTest01() throws Throwable{
+		// 1732: Expected false | Actual true 
+		boolean isLeapBool = Subject.GregorianTasks.isLeapYear(1900);
+		
+		// 416: Expected false | Actual True
+		boolean isNumericBool = Subject.StringTasks.isNumeric("a123");
+		
+		// 563: Expected S, S | Actual SS	
+		String[] actualSplitResult = Subject.StringTasks.splitByCharacterType("SS");
 
-        // Expected: false | Actual: true (fault_1732)
-        boolean boolean1 = Subject.GregorianTasks.isLeapYear(1900);
-
-        // Expected: false | Actual: true (fault_416)
-        boolean boolean2 = Subject.StringTasks.isNumeric("a");
-
-        // Expected: "fT" | Actual: "Tf"
-        String string3 = Stream.of(boolean1, !boolean2).map(x -> (x ? "T" : "f")).collect(Collectors.joining());
-
-        // Expected: {"f", "T"} | Actual: {"Tf"} (fault_563)
-        String[] strArray4 = Subject.StringTasks.splitByCharacterType(string3);
-
-        assertArrayEquals(new String[] { "f", "T" }, strArray4);
+		String[] expectedSplitResult = {"S", "S"};
+		
+		assertAll( "Refined tests", 
+				() -> Assertions.assertEquals(isLeapBool, false),
+				() -> Assertions.assertEquals(isNumericBool, false),
+				() -> Assertions.assertEquals(actualSplitResult, expectedSplitResult)
+		);
+		
 	}
 
 }

@@ -1,0 +1,10 @@
+Fault Location : Line 563
+Fault Line : for (int pos = tokenStart + 1; pos < c.length - 1; pos++) {
+
+Corresponding fixing patch:
+for (int pos = tokenStart + 1; pos < c.length; pos++) {
+
+Rationale that it is a fault:
+This for loop in line563 skips the last character in the given string.
+
+Suspicious Score and Rankings:

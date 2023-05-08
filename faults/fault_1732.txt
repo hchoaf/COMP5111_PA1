@@ -1,0 +1,15 @@
+Fault Location : Line 1732
+Fault Line : return ((year & 3) == 0) || (((year % 100) != 0) || ((year % 400) == 0));
+
+Corresponding fixing patch:
+return ((year & 3) == 0) && (((year % 100) != 0) || ((year % 400) == 0));
+
+Rationale that it is a fault:
+Leap year checking process is as follows:
+If a year is divisible by 4, it is a leap year.
+However, a year is divisible by 100 but not by 400, it is not a leap year.
+According to this set of rules, a year is a leap year if it is,
+- divisible by 4
+- and not divisible by 100 or divisible by 400
+
+Suspicious Score and Rankings:

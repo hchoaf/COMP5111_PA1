@@ -34,6 +34,22 @@ public class ReportData {
 		return s.toString();
 	}
 	
+	public String debugString() {
+		StringBuilder s = new StringBuilder();
+		s.append(this.lineNumber);
+		s.append("\t");
+		s.append(this.methodSignature);
+		s.append("\t");
+		s.append(this.statementString);
+		s.append("\t");
+		s.append(String.format("%.10f\t", this.suspiciousScore));
+		s.append(this.ranking);
+		s.append("\n");
+		
+		return s.toString();
+		
+	}
+	
 	public static class ReportDataComparator implements Comparator<ReportData> {
 	
 		@Override
@@ -52,4 +68,23 @@ public class ReportData {
 	    }
 		
 	}
+	
+	
+	public static class DebugReportDataComparator implements Comparator<ReportData> {
+		@Override
+		public int compare(ReportData o1, ReportData o2) {
+	        int result = Double.compare(o1.ranking, o2.ranking);
+	        
+	        if (result == 0) {
+	            result = Integer.compare(o1.lineNumber, o2.lineNumber);
+	            
+	            if (result == 0) {
+	                result = o1.statementString.compareTo(o2.statementString);
+	            }
+	        }
+	        
+	        return result;
+	    }
+	}
+	
 }

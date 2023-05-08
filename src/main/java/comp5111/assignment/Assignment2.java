@@ -29,16 +29,18 @@ public class Assignment2 {
 	// Constants for file names
 	private static final String ROOT_DIR = System.getProperty("user.dir");
 	private static final String EXTENSION = ".tsv";
-	private static final String REPORT_DIR = ROOT_DIR + "/assignment2-reports";
+	private static final String REPORT_DIR = ROOT_DIR + "/src/test";
 	private static final String FILENAME_PREFIX = "spectrum_fl_";
 	private static final String[] TEST_SUITE_CLASSES = {"Regression_0_Test", "Regression_1_Test", "Regression_2_Test", "Subject_FaultRevealing0_ESTest", "Subject_FaultRevealing1_ESTest", "Subject_FaultRevealing2_ESTest"};
 	private static final String[] TEST_SUITE_NAMES = {"randoop0", "randoop1", "randoop2", "evosuite0", "evosuite1", "evosuite2"};
+	private static final String[] REFINED_TEST_SUITE_CLASSES = {"Refined_Regression_0_Test", "Refined_Regression_1_Test", "Refined_Regression_2_Test", "Refined_Subject_FaultRevealing0_ESTest", "Refined_Subject_FaultRevealing1_ESTest", "Refined_Subject_FaultRevealing2_ESTest"};
+	private static final String[] REFINED_TEST_SUITE_NAMES = {"refined-randoop0", "refined-randoop1", "refined-randoop2", "refined-evosuite0", "refined-evosuite1", "refined-evosuite2"};
+	private static final String[] ALGO_NAMES = {"ochiai"};//, "jaccard", "tarantula", "ample"};
 	private static final int MAX_LENGTH = 100;
 
 	// private static final String[] TEST_SUITE_CLASSES = {"Subject_FaultRevealing0_ESTest", "Subject_FaultRevealing1_ESTest", "Subject_FaultRevealing2_ESTest"};
 	// private static final String[] TEST_SUITE_NAMES = {"evosuite0", "evosuite1", "evosuite2"};
 	
-	private static final String[] ALGO_NAMES = {"ochiai", "jaccard", "tarantula", "ample"};
 	
 	
 	// Constants for class names
@@ -47,7 +49,6 @@ public class Assignment2 {
 	private static final String CUT_PATH = "./raw-classes";
 	private static final String TESTCLASS_PATH = "./target/classes";
 	private static final String CLASS_PATH_SEPARATOR = (System.getProperty("os.name").toLowerCase().contains("win")) ? ";" : ":";
-	private static final String REFINED_PREFIX = "Refined";
 	
 	
 	static final ConcurrentHashMap<Integer, Description> testDescriptionMap = new ConcurrentHashMap<>();
@@ -71,7 +72,7 @@ public class Assignment2 {
     	instrumentWithSoot();
     	
 
-
+    	/*
     	String testClassName = REFINED_PREFIX + "_" + TEST_SUITE_CLASSES[3];
     	String algoName = "ochiai";
     	String fileName = "evosuite0";
@@ -79,25 +80,45 @@ public class Assignment2 {
     	runJunitTests(PACKAGE_NAME + "." + testClassName);
     	createTSV(algoName, fileName, printContents(algoName), true);
     	System.out.println(printContents(algoName));
-    	// System.out.println(printFailingTestsByLineNumber());
+    	*/
+
+    	System.out.println("Running Fault Localization on Original Test Suite");
     	
-    	
-    	/*
-    	System.out.println("Main Ended");
     	for (String algoName : ALGO_NAMES) {
     		for (int i = 0; i<TEST_SUITE_NAMES.length; i++) {
     			String testClassName = TEST_SUITE_CLASSES[i];
     			runJunitTests(PACKAGE_NAME + "." + testClassName);
     			
-    			createTSV(algoName, TEST_SUITE_NAMES[i], printContents(algoName));
+    			createTSV(algoName, TEST_SUITE_NAMES[i], printContents(algoName, false));
     			
+    			File debugDir = new File(ROOT_DIR+"/assignment2-logs");
+    			if (!debugDir.exists()) debugDir.mkdir();
     			
-    			
-    			
+    			try {
+	    			String debugLogDir = debugDir + "/" + algoName + "_" + TEST_SUITE_NAMES[i] + ".log";
+	    			FileWriter fs = new FileWriter(debugLogDir);
+	    			fs.write(printFailingTestsByLineNumber());
+	    			fs.close();
+    			} catch (IOException e) {
+    				e.printStackTrace();
+    			}
+    	    	// System.out.println(printFailingTestsByLineNumber());
     			clearEverything();
     		}
     	}
-    	*/
+    	
+    	System.out.println("Running Fault Localization on Refined Test Suite");
+    	for (String algoName : ALGO_NAMES) {
+    		for (int i = 0; i<REFINED_TEST_SUITE_NAMES.length; i++) {
+    			String testClassName = REFINED_TEST_SUITE_CLASSES[i];
+    			runJunitTests(PACKAGE_NAME + "." + testClassName);
+    			
+    			createTSV(algoName, REFINED_TEST_SUITE_NAMES[i], printContents(algoName, false));
+    			
+    	    	// System.out.println(printFailingTestsByLineNumber());
+    			clearEverything();
+    		}
+    	}
     	
     	
 
@@ -154,7 +175,7 @@ public class Assignment2 {
 		
 	}
 	
-	private static String printContents(String algoName) {
+	private static String printContents(String algoName, boolean debug) {
 		
 		
 		
@@ -184,15 +205,24 @@ public class Assignment2 {
 			reportContents.add(reportData);
 			
 		}
-		Collections.sort(reportContents, new ReportData.ReportDataComparator());
-		
+		if (debug) {
+			Collections.sort(reportContents, new ReportData.DebugReportDataComparator());
+		} else {
+			Collections.sort(reportContents, new ReportData.ReportDataComparator());
+		}
 		
 		StringBuilder s = new StringBuilder();
 		for (ReportData reportData : reportContents) {
-			s.append(reportData.toString());
+			if (debug) {
+				s.append(reportData.debugString());
+			} else {
+				s.append(reportData.toString());
+			}
 		}
 		return s.toString();
 	}
+	
+	
 	
 	
     private static String printFailingTestsByLineNumber() {
@@ -244,14 +274,21 @@ public class Assignment2 {
     
     private static HashMap<Integer, Double> jaccardScore() {
     	HashMap<Integer, Double> jaccardMap = new HashMap<>();
-    	int Nf = failedTestCases;
-    	int Ns = totalTestCases - failedTestCases;
+    	double Nf = failedTestCases;
+    	double Ns = totalTestCases - failedTestCases;
 
 		for (final Map.Entry<Integer, StatementInfo> entry : Counter.allExecutedStatements.entrySet()) {
 			Integer stmtHashCode = entry.getKey();
-			int Nef = getFailTestNumByStmt(stmtHashCode);
-			int Nes = getPassTestNumByStmt(stmtHashCode);
+			double Nef = getFailTestNumByStmt(stmtHashCode);
+			double Nes = getPassTestNumByStmt(stmtHashCode);
 			double jaccardScore = (Nef / (Nf + Nes));
+			/*
+			if (Nef != 0) {
+				System.out.printf("Nf : %d, Ns: %d, Nef : %d , Nes : %d\n", Nf, Ns, Nef, Nes);
+				System.out.printf("Jaccard Score: %10f\n", jaccardScore);
+			
+			}
+			*/
 			jaccardMap.put(stmtHashCode, jaccardScore);
 		}
 		
@@ -264,13 +301,13 @@ public class Assignment2 {
     
     private static HashMap<Integer, Double> tarantulaScore() {
     	HashMap<Integer, Double> tarantulaMap = new HashMap<>();
-    	int Nf = failedTestCases;
-    	int Ns = totalTestCases - failedTestCases;
+    	double Nf = failedTestCases;
+    	double Ns = totalTestCases - failedTestCases;
 
 		for (final Map.Entry<Integer, StatementInfo> entry : Counter.allExecutedStatements.entrySet()) {
 			Integer stmtHashCode = entry.getKey();
-			int Nef = getFailTestNumByStmt(stmtHashCode);
-			int Nes = getPassTestNumByStmt(stmtHashCode);
+			double Nef = getFailTestNumByStmt(stmtHashCode);
+			double Nes = getPassTestNumByStmt(stmtHashCode);
 			double firstTerm = Nef/Nf;
 			double secondTerm = Nes/Ns;
 			double tarantulaScore = firstTerm / (firstTerm + secondTerm);
@@ -286,13 +323,13 @@ public class Assignment2 {
     
     private static HashMap<Integer, Double> ampleScore() {
     	HashMap<Integer, Double> ampleMap = new HashMap<>();
-    	int Nf = failedTestCases;
-    	int Ns = totalTestCases - failedTestCases;
+    	double Nf = failedTestCases;
+    	double Ns = totalTestCases - failedTestCases;
 
 		for (final Map.Entry<Integer, StatementInfo> entry : Counter.allExecutedStatements.entrySet()) {
 			Integer stmtHashCode = entry.getKey();
-			int Nef = getFailTestNumByStmt(stmtHashCode);
-			int Nes = getPassTestNumByStmt(stmtHashCode);
+			double Nef = getFailTestNumByStmt(stmtHashCode);
+			double Nes = getPassTestNumByStmt(stmtHashCode);
 			double firstTerm = Nef / Nf;
 			double secondTerm = Nes / Ns;
 			// System.out.println(firstTerm);
@@ -311,13 +348,13 @@ public class Assignment2 {
     
     private static HashMap<Integer, Double> ochiaiScore() {
     	HashMap<Integer, Double> ochiaiScoreMap = new HashMap<>();
-    	int Nf = failedTestCases;
-    	int Ns = totalTestCases - failedTestCases;
+    	double Nf = failedTestCases;
+    	double Ns = totalTestCases - failedTestCases;
 
 		for (final Map.Entry<Integer, StatementInfo> entry : Counter.allExecutedStatements.entrySet()) {
 			Integer stmtHashCode = entry.getKey();
-			int Nef = getFailTestNumByStmt(stmtHashCode);
-			int Nes = getPassTestNumByStmt(stmtHashCode);
+			double Nef = getFailTestNumByStmt(stmtHashCode);
+			double Nes = getPassTestNumByStmt(stmtHashCode);
 			Double ochiaiSimilarity = (Nef / Math.sqrt(Nf * (Nef + Nes)));
 			ochiaiScoreMap.put(stmtHashCode, ochiaiSimilarity);
 		}
@@ -381,6 +418,7 @@ public class Assignment2 {
     				testCaseNum++;
     			}
     		});
+    		System.out.println("----------------------------------------------------------------");
     		System.out.println("Running JUnit test: " + testClass.getName());
     		junit.run(testClass);
     	} catch (ClassNotFoundException e) {
@@ -394,13 +432,10 @@ public class Assignment2 {
     
     
     
-    private static void createTSV(String algoName, String suiteName, String content, Boolean refined) {
-		String fileDir = REPORT_DIR + "/" + algoName + "/" + FILENAME_PREFIX + algoName + "_" + suiteName + EXTENSION;
-    	if (refined) {
-    		createReportDirectory(algoName + "_" + REFINED_PREFIX);
-    		fileDir = REPORT_DIR + "/" + algoName + "_" + REFINED_PREFIX + "/" + FILENAME_PREFIX + algoName + "_" + REFINED_PREFIX + "_" + suiteName + EXTENSION;
-    	} else {
-    		createReportDirectory(algoName);
+    private static void createTSV(String algoName, String suiteName, String content) {
+    	String fileDir = REPORT_DIR + "/fault-revealing-" + suiteName + "/" + FILENAME_PREFIX + algoName + "_" + suiteName + EXTENSION;
+    	if(suiteName.contains("refined")) {
+    		fileDir = REPORT_DIR + "/" + suiteName + "/" + FILENAME_PREFIX + algoName + "_refined_" + suiteName + EXTENSION;
     	}
     	try {
     		FileWriter fs = new FileWriter(fileDir);
