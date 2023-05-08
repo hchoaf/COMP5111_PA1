@@ -1,11 +1,11 @@
 package comp5111.assignment.cut;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
+import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
 
-class Refined_Subject_FaultRevealing2_ESTest extends Subject_FaultRevealing2_ESTest {
+public class Refined_Subject_FaultRevealing2_ESTest extends Subject_FaultRevealing2_ESTest {
 
 	@Test
 	public void myTest01() throws Throwable{
@@ -27,4 +27,5 @@ class Refined_Subject_FaultRevealing2_ESTest extends Subject_FaultRevealing2_EST
 		);
 		
 	}
+
 }

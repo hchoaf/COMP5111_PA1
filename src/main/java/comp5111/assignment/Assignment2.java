@@ -35,7 +35,7 @@ public class Assignment2 {
 	private static final String[] TEST_SUITE_NAMES = {"randoop0", "randoop1", "randoop2", "evosuite0", "evosuite1", "evosuite2"};
 	private static final String[] REFINED_TEST_SUITE_CLASSES = {"Refined_Regression_0_Test", "Refined_Regression_1_Test", "Refined_Regression_2_Test", "Refined_Subject_FaultRevealing0_ESTest", "Refined_Subject_FaultRevealing1_ESTest", "Refined_Subject_FaultRevealing2_ESTest"};
 	private static final String[] REFINED_TEST_SUITE_NAMES = {"refined-randoop0", "refined-randoop1", "refined-randoop2", "refined-evosuite0", "refined-evosuite1", "refined-evosuite2"};
-	private static final String[] ALGO_NAMES = {"ochiai"};//, "jaccard", "tarantula", "ample"};
+	private static final String[] ALGO_NAMES = {"ochiai", "jaccard", "tarantula", "ample"};
 	private static final int MAX_LENGTH = 100;
 
 	// private static final String[] TEST_SUITE_CLASSES = {"Subject_FaultRevealing0_ESTest", "Subject_FaultRevealing1_ESTest", "Subject_FaultRevealing2_ESTest"};
@@ -89,7 +89,7 @@ public class Assignment2 {
     			String testClassName = TEST_SUITE_CLASSES[i];
     			runJunitTests(PACKAGE_NAME + "." + testClassName);
     			
-    			createTSV(algoName, TEST_SUITE_NAMES[i], printContents(algoName, false));
+    			createTSV(algoName, TEST_SUITE_NAMES[i], printContents(algoName, true));
     			
     			File debugDir = new File(ROOT_DIR+"/assignment2-logs");
     			if (!debugDir.exists()) debugDir.mkdir();
@@ -102,20 +102,28 @@ public class Assignment2 {
     			} catch (IOException e) {
     				e.printStackTrace();
     			}
+
+        		System.out.printf("Total : %d\n", testCaseNum);
+        		System.out.printf("Failed : %d\n", failedTestCases);
+        		System.out.printf("Finished : %d\n", totalTestCases);
     	    	// System.out.println(printFailingTestsByLineNumber());
     			clearEverything();
     		}
     	}
     	
+    	clearEverything();
     	System.out.println("Running Fault Localization on Refined Test Suite");
     	for (String algoName : ALGO_NAMES) {
     		for (int i = 0; i<REFINED_TEST_SUITE_NAMES.length; i++) {
     			String testClassName = REFINED_TEST_SUITE_CLASSES[i];
     			runJunitTests(PACKAGE_NAME + "." + testClassName);
     			
-    			createTSV(algoName, REFINED_TEST_SUITE_NAMES[i], printContents(algoName, false));
+    			createTSV(algoName, REFINED_TEST_SUITE_NAMES[i], printContents(algoName, true));
     			
     	    	// System.out.println(printFailingTestsByLineNumber());
+        		System.out.printf("Total : %d\n", testCaseNum);
+        		System.out.printf("Failed : %d\n", failedTestCases);
+        		System.out.printf("Finished : %d\n", totalTestCases);
     			clearEverything();
     		}
     	}
@@ -423,10 +431,6 @@ public class Assignment2 {
     		junit.run(testClass);
     	} catch (ClassNotFoundException e) {
     		e.printStackTrace();
-    	} finally {
-    		System.out.printf("Total : %d\n", testCaseNum);
-    		System.out.printf("Failed : %d\n", failedTestCases);
-    		System.out.printf("Finished : %d\n", totalTestCases);
     	}
     }
     
@@ -435,11 +439,10 @@ public class Assignment2 {
     private static void createTSV(String algoName, String suiteName, String content) {
     	String fileDir = REPORT_DIR + "/fault-revealing-" + suiteName + "/" + FILENAME_PREFIX + algoName + "_" + suiteName + EXTENSION;
     	if(suiteName.contains("refined")) {
-    		fileDir = REPORT_DIR + "/" + suiteName + "/" + FILENAME_PREFIX + algoName + "_refined_" + suiteName + EXTENSION;
+    		fileDir = REPORT_DIR + "/" + suiteName + "/" + FILENAME_PREFIX + algoName + "_refined_" + suiteName.substring(8) + EXTENSION;
     	}
     	try {
     		FileWriter fs = new FileWriter(fileDir);
-    		fs.write(String.format("Ranking and Score by %s algorithm\n", algoName));
     		fs.write("Method Signature\tStatement\tSuspicious Score\tRanking\n");
     		fs.write(content);
     		fs.close();
