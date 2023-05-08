@@ -60,7 +60,7 @@ javac -d "$ROOT_DIR"/raw-classes -g "$ROOT_DIR"/src/main/java/comp5111/assignmen
 
 
 echo "Test Evosuite"
-for i in 0 1
+for i in 0 1 2 3 4
 do
     echo "Generating Test Suite $i"
 
@@ -69,6 +69,9 @@ do
     java -jar "$ROOT_DIR"/lib/evosuite-1.2.0.jar -class comp5111.assignment.cut.Subject \
         -projectCP "$ROOT_DIR"/raw-classes \
         -criterion branch \
+        -Drandom_seed=$i \
+        -Dsearch_budget=500 \
         -Dtest_dir="$ROOT_DIR"/src/test/evosuite$i \
-        -Dreport_dir="$ROOT_DIR"/evosuite-reports/evosuite$i 
+        -Dreport_dir="$ROOT_DIR"/src/test/evosuite$i \
+	      -Djunit_suffix=_"$i"_ESTest
 done

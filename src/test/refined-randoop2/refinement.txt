@@ -1,0 +1,27 @@
+Explanation:
+I added one test case with assertAll, which contains 3 assert statements, each for each fault.
+GregorianTasks.isLeapYear(1900) should return false, but according to the the current implementation, it returns true.
+So I added this as one of the assert statements.
+StringTasks.isNumeric("a123") should return false, but according to the current implementation, it returns true. 
+So I added this as one of the assert statements.
+StringTasks.splitByCharacterType("SS") should return {"S", "S"}, but according to the current implementation, it returns {"SS"}.
+So I added this as one of the assert statements.
+
+
+
+
+
+
+Ranking and Score change:
+
+fault_416:  
+Ochiai Suspicious Score (Old->New): 
+Ranking (Old->New):
+
+fault_563
+Ochiai Suspicious Score (Old->New): 
+Ranking (Old->New):
+
+fault_1732
+Ochiai Suspicious Score (Old->New): 
+Ranking (Old->New):
