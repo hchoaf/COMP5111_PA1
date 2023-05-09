@@ -16,6 +16,9 @@
 	<classpathentry kind="src" path="src/test/refined-randoop2"/>
 	<classpathentry kind="src" path="src/test/evosuite0"/>
 	<classpathentry kind="src" path="src/test/evosuite1"/>
+	<classpathentry kind="src" path="src/test/evosuite2"/>
+	<classpathentry kind="src" path="src/test/evosuite3"/>
+	<classpathentry kind="src" path="src/test/evosuite4"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-11">
 		<attributes>
 			<attribute name="module" value="true"/>
