@@ -89,7 +89,7 @@ public class Assignment2 {
     			String testClassName = TEST_SUITE_CLASSES[i];
     			runJunitTests(PACKAGE_NAME + "." + testClassName);
     			
-    			createTSV(algoName, TEST_SUITE_NAMES[i], printContents(algoName, true));
+    			createTSV(algoName, TEST_SUITE_NAMES[i], printContents(algoName, false));
     			
     			File debugDir = new File(ROOT_DIR+"/assignment2-logs");
     			if (!debugDir.exists()) debugDir.mkdir();
@@ -118,7 +118,7 @@ public class Assignment2 {
     			String testClassName = REFINED_TEST_SUITE_CLASSES[i];
     			runJunitTests(PACKAGE_NAME + "." + testClassName);
     			
-    			createTSV(algoName, REFINED_TEST_SUITE_NAMES[i], printContents(algoName, true));
+    			createTSV(algoName, REFINED_TEST_SUITE_NAMES[i], printContents(algoName, false));
     			
     	    	// System.out.println(printFailingTestsByLineNumber());
         		System.out.printf("Total : %d\n", testCaseNum);

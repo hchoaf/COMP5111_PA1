@@ -1,8 +1,11 @@
 Fault Location : Line 1732
+
 Fault Line : return ((year & 3) == 0) || (((year % 100) != 0) || ((year % 400) == 0));
+
 
 Corresponding fixing patch:
 return ((year & 3) == 0) && (((year % 100) != 0) || ((year % 400) == 0));
+
 
 Rationale that it is a fault:
 Leap year checking process is as follows:
@@ -12,4 +15,12 @@ According to this set of rules, a year is a leap year if it is,
 - divisible by 4
 - and not divisible by 100 or divisible by 400
 
+
 Suspicious Score and Rankings:
+
+fault-revealing-evosuite0:  0.3780 (50)
+fault-revealing-evosuite1:  0.4364 (3)
+fault-revealing-evsouite2:  0.4472 (38)
+fault-revealing-randoop0:   0.8498 (1)
+fault-revealing-randoop1:   0.9075 (1)
+fault-revealing-randoop2:   0.4472 (4)

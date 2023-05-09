@@ -1,11 +1,22 @@
 Fault Location : Line 416
+
 Fault Line : for (int i = 1; i < sz; i++) {
+
 
 Corresponding fixing patch:
 for (int i = 0; i < sz; i++) {
+
 
 Rationale that it is a fault:
 This function checks if the CharSequence contains only Unicode digits.
 However, according to the for loop in line 416, it skips the first character of the sequence.
 
-Suspicious Score and Rankings:
+
+Suspicious Score (Ranking):
+
+fault-revealing-evosuite0:  0.3780 (50)
+fault-revealing-evosuite1:  0.4115 (12)
+fault-revealing-evsouite2:  0.2582 (61)
+fault-revealing-randoop0:   0.25 (11)
+fault-revealing-randoop1:   0.1011 (20)
+fault-revealing-randoop2:   0.1118 (86)
